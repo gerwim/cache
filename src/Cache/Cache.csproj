@@ -5,7 +5,7 @@
         <Nullable>disable</Nullable>
         <LangVersion>10</LangVersion>
         <PackageId>GerwimFeiken.Cache</PackageId>
-        <Version>0.0.3</Version>
+        <Version>0.0.4</Version>
         <PackageTags>Cache;Key value;keyvalue</PackageTags>
         <Description>
            This library provides you with a simple key value caching solution for your application.
