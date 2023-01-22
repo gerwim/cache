@@ -2,6 +2,8 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using Flurl.Http;
+using GerwimFeiken.Cache.Exceptions;
+using GerwimFeiken.Cache.Utils;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
@@ -9,12 +11,19 @@ namespace GerwimFeiken.Cache.Implementations
 {
     public class Cloudflare : BaseCache
     {
-        private readonly IConfiguration _configuration;
+        private readonly string _apiUrl;
+        private readonly string _apiToken;
         private readonly int _expirationTtl;
         
         public Cloudflare(IConfiguration configuration)
         {
-            _configuration = configuration;
+            if (configuration is null) throw new ArgumentNullException(nameof(configuration));
+
+            var accountId = configuration.GetRequiredValue("GerwimFeiken.Cache:Cloudflare:AccountId");
+            var namespaceId = configuration.GetRequiredValue("GerwimFeiken.Cache:Cloudflare:NamespaceId");
+            
+            _apiUrl = $"https://api.cloudflare.com/client/v4/accounts/{accountId}/storage/kv/namespaces/{namespaceId}";
+            _apiToken = configuration.GetRequiredValue("GerwimFeiken.Cache:Cloudflare:ApiToken");
 
             try
             {
@@ -42,8 +51,8 @@ namespace GerwimFeiken.Cache.Implementations
             string value = null;
             try
             {
-                value = await $"{_configuration["GerwimFeiken.Cache:Cloudflare:KVUrl"]}/values/{key}"
-                    .WithOAuthBearerToken(_configuration["GerwimFeiken.Cache:Cloudflare:ApiToken"])
+                value = await $"{_apiUrl}/values/{key}"
+                    .WithOAuthBearerToken(_apiToken)
                     .GetStringAsync();
             }
             catch (FlurlHttpException ex)
@@ -67,8 +76,8 @@ namespace GerwimFeiken.Cache.Implementations
         private async Task WriteToCloudflare(string key, string value, int? expireInSeconds)
         {
             await
-                $"{_configuration["GerwimFeiken.Cache:Cloudflare:KVUrl"]}/values/{key}?expiration_ttl={expireInSeconds?.ToString() ?? _expirationTtl.ToString()}"
-                    .WithOAuthBearerToken(_configuration["GerwimFeiken.Cache:Cloudflare:ApiToken"])
+                $"{_apiUrl}/values/{key}?expiration_ttl={expireInSeconds?.ToString() ?? _expirationTtl.ToString()}"
+                    .WithOAuthBearerToken(_apiToken)
                     .PutAsync(new StringContent(value));
         }
     }

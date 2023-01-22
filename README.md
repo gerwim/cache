@@ -28,8 +28,9 @@ or configured in `appsettings.json`:
 ...
 "GerwimFeiken.Cache": {
   "Cloudflare": {
-    "ApiToken": "xxxx",
-    "KVUrl": "https://api.cloudflare.com/..."
+    "ApiToken": "XXXX",
+    "AccountId": "YYYY",
+    "NamespaceId": "ZZZZ"
   }
 }
 ...
@@ -38,13 +39,11 @@ or configured in `appsettings.json`:
 ### API token
 You can create the ApiToken at the [Cloudflare profile page](https://dash.cloudflare.com/profile/api-tokens). 
 
-### KV url 
-The KV URL consists of your account ID and your namespace ID. This is a correct format:
-`https://api.cloudflare.com/client/v4/accounts/XXXXXXXX/storage/kv/namespaces/YYYYYYYY`
-
+### Account and namespace ID
 When visiting the KV dashboard page, you can extract both ID's from the URL:
-`https://dash.cloudflare.com/XXXXXXXX/workers/kv/namespaces/YYYYYYYY`
+`https://dash.cloudflare.com/YYYY/workers/kv/namespaces/ZZZZ`
 
+Where `YYYY` is your AccountId and `ZZZZ` is your NamespaceId.
 
 
 # How to use
