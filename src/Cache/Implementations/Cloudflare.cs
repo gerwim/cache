@@ -1,19 +1,19 @@
 ﻿using System;
-using System.Net.Http;
+using System.Net;
 using System.Threading.Tasks;
-using Flurl.Http;
 using GerwimFeiken.Cache.Exceptions;
+using GerwimFeiken.Cache.Repositories;
 using GerwimFeiken.Cache.Utils;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using Refit;
 
 namespace GerwimFeiken.Cache.Implementations
 {
     public class Cloudflare : BaseCache
     {
-        private readonly string _apiUrl;
-        private readonly string _apiToken;
         private readonly int _expirationTtl;
+        private readonly ICloudflareApi _cloudflareApi;
         
         public Cloudflare(IConfiguration configuration)
         {
@@ -22,8 +22,13 @@ namespace GerwimFeiken.Cache.Implementations
             var accountId = configuration.GetRequiredValue("GerwimFeiken.Cache:Cloudflare:AccountId");
             var namespaceId = configuration.GetRequiredValue("GerwimFeiken.Cache:Cloudflare:NamespaceId");
             
-            _apiUrl = $"https://api.cloudflare.com/client/v4/accounts/{accountId}/storage/kv/namespaces/{namespaceId}";
-            _apiToken = configuration.GetRequiredValue("GerwimFeiken.Cache:Cloudflare:ApiToken");
+            var apiUrl = $"https://api.cloudflare.com/client/v4/accounts/{accountId}/storage/kv/namespaces/{namespaceId}";
+            var apiToken = configuration.GetRequiredValue("GerwimFeiken.Cache:Cloudflare:ApiToken");
+            
+            _cloudflareApi = RestService.For<ICloudflareApi>(apiUrl, new RefitSettings
+            {
+                AuthorizationHeaderValueGetter = () => Task.FromResult(apiToken)
+            });
 
             try
             {
@@ -39,67 +44,45 @@ namespace GerwimFeiken.Cache.Implementations
         
         protected override async Task DeleteImplementation(string key)
         {
-            try
+            var response = await _cloudflareApi.DeleteKey(key);
+
+            if (response.Error is not null && response.StatusCode != HttpStatusCode.NotFound)
             {
-                await $"{_apiUrl}/values/{key}"
-                    .WithOAuthBearerToken(_apiToken)
-                    .DeleteAsync();
-            }
-            catch (FlurlHttpException ex)
-            {
-                if (ex.Message.Contains("404 (Not Found)"))
-                {
-                    // nothing
-                }
-                else
-                {
-                    throw;
-                }
+                throw new DeleteException("Could not delete from Cloudflare, see inner exception for more details.", response.Error);
             }
         }
 
         protected override async Task WriteImplementation<T>(string key, T value, int? expireInSeconds)
         {
+            if ((expireInSeconds ?? _expirationTtl) < 60)
+            {
+                throw new WriteException("Expiration should be 60 or greater.");
+            }
+            
             string json = JsonConvert.SerializeObject(value, settings: new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             });
-            await WriteToCloudflare(key, json, expireInSeconds);
+            var response = await _cloudflareApi.WriteKey(key, expireInSeconds ?? _expirationTtl, json);
+            if (response.Error is not null)
+            {
+                throw new WriteException("Could not write to Cloudflare, see inner exception for more details.", response.Error);
+            }
         }
         
         protected override async Task<T> ReadImplementation<T>(string key)
         {
-            string value = null;
-            try
+            var response = await _cloudflareApi.GetKey(key);
+
+            if (response.Error is not null && response.StatusCode != HttpStatusCode.NotFound)
             {
-                value = await $"{_apiUrl}/values/{key}"
-                    .WithOAuthBearerToken(_apiToken)
-                    .GetStringAsync();
-            }
-            catch (FlurlHttpException ex)
-            {
-                if (ex.Message.Contains("404 (Not Found)"))
-                {
-                    // nothing
-                }
-                else
-                {
-                    throw;
-                }
+                throw new ReadException("Could not read from Cloudflare, see inner exception for more details.", response.Error);
             }
 
-            if (value == null) return default;
+            if (response.Content == null) return default;
 
-            T obj = JsonConvert.DeserializeObject<T>(value);
+            T obj = JsonConvert.DeserializeObject<T>(response.Content);
             return obj;
-        }
-        
-        private async Task WriteToCloudflare(string key, string value, int? expireInSeconds)
-        {
-            await
-                $"{_apiUrl}/values/{key}?expiration_ttl={expireInSeconds?.ToString() ?? _expirationTtl.ToString()}"
-                    .WithOAuthBearerToken(_apiToken)
-                    .PutAsync(new StringContent(value));
         }
     }
 }
