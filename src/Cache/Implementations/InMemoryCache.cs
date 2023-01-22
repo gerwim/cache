@@ -1,29 +1,20 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
+using GerwimFeiken.Cache.Options;
 using Newtonsoft.Json;
 
 namespace GerwimFeiken.Cache.Implementations
 {
     public class InMemoryCache : BaseCache
     {
-        private readonly int _expirationTtl;
+        private readonly IInMemoryOptions _options;
         private ConcurrentDictionary<string, (DateTime expireAtUtc, string data)> LocalCache { get; }
         
-        public InMemoryCache(IConfiguration configuration)
+        public InMemoryCache(IInMemoryOptions options)
         {
+            _options = options;
             LocalCache = new ConcurrentDictionary<string, (DateTime expireAtUtc, string data)>();
-            try
-            {
-                _expirationTtl = string.IsNullOrWhiteSpace(configuration["GerwimFeiken.Cache:DefaultExpirationTtl"])
-                    ? 86400
-                    : Convert.ToInt32(configuration["GerwimFeiken.Cache:DefaultExpirationTtl"]);
-            }
-            catch
-            {
-                _expirationTtl = 86400;
-            }
         }
 
         protected override Task DeleteImplementation(string key)
@@ -34,7 +25,7 @@ namespace GerwimFeiken.Cache.Implementations
 
         protected override Task WriteImplementation<T>(string key, T value, int? expireInSeconds)
         {
-            LocalCache[key] = (DateTime.UtcNow.AddSeconds(expireInSeconds ?? _expirationTtl), JsonConvert.SerializeObject(value, settings: new JsonSerializerSettings
+            LocalCache[key] = (DateTime.UtcNow.AddSeconds(expireInSeconds ?? _options.DefaultExpirationTtl), JsonConvert.SerializeObject(value, settings: new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             }));
