@@ -1,60 +1,62 @@
-# cache
-.NET library which provides key value cache functionality
+# GerwimFeiken.Cache
+.NET library which provides key value cache functionality.
 
-# Supported backends
-* InMemoryCache
-* Cloudflare KV storage
+# Supported providers
+* In memory cache (`InMemoryCache`)
+* Cloudflare KV storage (`CloudflareCache`)
 
+# How to use
+## Dependency injection
+
+```
+builder.Services.AddSingleton<ICache>(new Provider());
+```
+where `Provider` is one of the supported providers.
+
+## Console application / class library
+```
+ICache cache = new Provider()
+```
 ## General configuration
-You can configure the default expiration TTL by setting the environment variable `GerwimFeiken.Cache__ExpirationTtl`, or through your `appsettings.json`:
+When creating the provider, you'll need to pass options. These will extend from [options](src/Cache/Options/Options.cs).
+You can override these values when instantiating your provider, e.g.
 
 ```
-...
-"GerwimFeiken.Cache": {
-  "DefaultExpirationTtl": 3600
-}
-...
+ICache cache = new InMemoryCache(new InMemoryOptions
+{
+    DefaultExpirationTtl = 3600
+});
 ```
-## InMemoryCache
+### InMemoryCache
 No additional configuration is needed.
 
-## Cloudflare KV storage
-You'll need to configure these two environment variables (or configure them in `appsettings.json`):
-* GerwimFeiken.Cache__Cloudflare__ApiToken
-* GerwimFeiken.Cache__Cloudflare__KVUrl
-
-or configured in `appsettings.json`:
+### CloudflareCache
 ```
-...
-"GerwimFeiken.Cache": {
-  "Cloudflare": {
-    "ApiToken": "XXXX",
-    "AccountId": "YYYY",
-    "NamespaceId": "ZZZZ"
-  }
-}
-...
+ICache cache = new CloudflareCache(new CloudflareOptions
+{
+    DefaultExpirationTtl = 86400, // can be omitted
+    ApiToken = "XXX",
+    AccountId = "YYYY",
+    NamespaceId = "ZZZZ"
+});
 ```
 
-### API token
+**Api Token**
+
 You can create the ApiToken at the [Cloudflare profile page](https://dash.cloudflare.com/profile/api-tokens). 
 
-### Account and namespace ID
+**Account and namespace ID**
+
 When visiting the KV dashboard page, you can extract both ID's from the URL:
 `https://dash.cloudflare.com/YYYY/workers/kv/namespaces/ZZZZ`
 
-Where `YYYY` is your AccountId and `ZZZZ` is your NamespaceId.
+Where `YYYY` is your `AccountId` and `ZZZZ` is your `NamespaceId`.
 
-
-# How to use
-Register your cache backend:
-
-```
-using GerwimFeiken.Cache;
-...
-services.AddSingleton<ICache, InMemoryCache>();
-```
 
 # Development
+## Tests
+Some of the tests might be an integration test.
+You'll need to specify correct options for these to work.
+## Pack
 To pack this library to use on NuGet, run the `dotnet pack` command:
 `dotnet pack -c release`
