@@ -16,9 +16,9 @@ namespace GerwimFeiken.Cache.Implementations
             LocalCache = new ConcurrentDictionary<string, (DateTime expireAtUtc, string data)>();
             try
             {
-                _expirationTtl = string.IsNullOrWhiteSpace(configuration["GerwimFeiken.Cache:ExpirationTtl"])
+                _expirationTtl = string.IsNullOrWhiteSpace(configuration["GerwimFeiken.Cache:DefaultExpirationTtl"])
                     ? 86400
-                    : Convert.ToInt32(configuration["GerwimFeiken.Cache:ExpirationTtl"]);
+                    : Convert.ToInt32(configuration["GerwimFeiken.Cache:DefaultExpirationTtl"]);
             }
             catch
             {

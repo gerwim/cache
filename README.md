@@ -11,7 +11,7 @@ You can configure the default expiration TTL by setting the environment variable
 ```
 ...
 "GerwimFeiken.Cache": {
-  "ExpirationTtl": 3600,
+  "DefaultExpirationTtl": 3600
 }
 ...
 ```
