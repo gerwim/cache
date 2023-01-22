@@ -30,7 +30,10 @@ namespace GerwimFeiken.Cache.Implementations
         
         protected override async Task WriteImplementation<T>(string key, T value, int? expireInSeconds)
         {
-            string json = JsonConvert.SerializeObject(value);
+            string json = JsonConvert.SerializeObject(value, settings: new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            });
             await WriteToCloudflare(key, json, expireInSeconds);
         }
         

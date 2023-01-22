@@ -27,7 +27,10 @@ namespace GerwimFeiken.Cache.Implementations
         }
         protected override Task WriteImplementation<T>(string key, T value, int? expireInSeconds)
         {
-            LocalCache[key] = (DateTime.UtcNow.AddSeconds(expireInSeconds ?? _expirationTtl), JsonConvert.SerializeObject(value));
+            LocalCache[key] = (DateTime.UtcNow.AddSeconds(expireInSeconds ?? _expirationTtl), JsonConvert.SerializeObject(value, settings: new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            }));
             return Task.CompletedTask;
         }
 
