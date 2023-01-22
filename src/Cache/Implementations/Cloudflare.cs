@@ -37,6 +37,27 @@ namespace GerwimFeiken.Cache.Implementations
             }
         }
         
+        protected override async Task DeleteImplementation(string key)
+        {
+            try
+            {
+                await $"{_apiUrl}/values/{key}"
+                    .WithOAuthBearerToken(_apiToken)
+                    .DeleteAsync();
+            }
+            catch (FlurlHttpException ex)
+            {
+                if (ex.Message.Contains("404 (Not Found)"))
+                {
+                    // nothing
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
+
         protected override async Task WriteImplementation<T>(string key, T value, int? expireInSeconds)
         {
             string json = JsonConvert.SerializeObject(value, settings: new JsonSerializerSettings

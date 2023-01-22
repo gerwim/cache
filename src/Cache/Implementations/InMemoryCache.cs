@@ -25,6 +25,13 @@ namespace GerwimFeiken.Cache.Implementations
                 _expirationTtl = 86400;
             }
         }
+
+        protected override Task DeleteImplementation(string key)
+        {
+            LocalCache.TryRemove(key, out _);
+            return Task.CompletedTask;
+        }
+
         protected override Task WriteImplementation<T>(string key, T value, int? expireInSeconds)
         {
             LocalCache[key] = (DateTime.UtcNow.AddSeconds(expireInSeconds ?? _expirationTtl), JsonConvert.SerializeObject(value, settings: new JsonSerializerSettings
