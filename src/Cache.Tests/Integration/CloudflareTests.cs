@@ -1,5 +1,5 @@
-﻿using GerwimFeiken.Cache.Implementations;
-using GerwimFeiken.Cache.Options;
+﻿using GerwimFeiken.Cache.Cloudflare;
+using GerwimFeiken.Cache.Cloudflare.Options;
 
 namespace Cache.Tests.Integration;
 

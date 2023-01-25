@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
+using GerwimFeiken.Cache.Cloudflare.Options;
+using GerwimFeiken.Cache.Cloudflare.Repositories;
 using GerwimFeiken.Cache.Exceptions;
-using GerwimFeiken.Cache.Options;
-using GerwimFeiken.Cache.Repositories;
 using GerwimFeiken.Cache.Utils;
 using Newtonsoft.Json;
 using Refit;
 
-namespace GerwimFeiken.Cache.Implementations
+namespace GerwimFeiken.Cache.Cloudflare
 {
     public class CloudflareCache : BaseCache
     {
@@ -24,7 +24,7 @@ namespace GerwimFeiken.Cache.Implementations
             
             var apiUrl = $"https://api.cloudflare.com/client/v4/accounts/{accountId}/storage/kv/namespaces/{namespaceId}";
             var apiToken = options.GetRequiredValue(x => x.ApiToken);
-            
+
             _cloudflareApi = RestService.For<ICloudflareApi>(apiUrl, new RefitSettings
             {
                 AuthorizationHeaderValueGetter = () => Task.FromResult(apiToken)
@@ -61,7 +61,7 @@ namespace GerwimFeiken.Cache.Implementations
             }
         }
         
-        protected override async Task<T> ReadImplementation<T>(string key)
+        protected override async Task<T?> ReadImplementation<T>(string key) where T : default
         {
             var response = await _cloudflareApi.GetKey(key);
 
@@ -72,7 +72,7 @@ namespace GerwimFeiken.Cache.Implementations
 
             if (response.Content == null) return default;
 
-            T obj = JsonConvert.DeserializeObject<T>(response.Content);
+            var obj = JsonConvert.DeserializeObject<T>(response.Content);
             return obj;
         }
     }

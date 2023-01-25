@@ -23,6 +23,8 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Cache.Cloudflare\Cache.Cloudflare.csproj" />
+      <ProjectReference Include="..\Cache.InMemory\Cache.InMemory.csproj" />
       <ProjectReference Include="..\Cache\Cache.csproj" />
     </ItemGroup>
 

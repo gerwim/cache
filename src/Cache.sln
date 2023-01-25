@@ -4,6 +4,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cache", "Cache\Cache.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cache.Tests", "Cache.Tests\Cache.Tests.csproj", "{E9949ED2-C9C7-4B7E-B5B7-FC6EDE60C3F2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cache.Cloudflare", "Cache.Cloudflare\Cache.Cloudflare.csproj", "{19F6A512-7379-43B0-A1B7-918E6947071F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cache.InMemory", "Cache.InMemory\Cache.InMemory.csproj", "{F18AFDBB-817F-4033-A9BE-1762C6327012}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +22,13 @@ Global
 		{E9949ED2-C9C7-4B7E-B5B7-FC6EDE60C3F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E9949ED2-C9C7-4B7E-B5B7-FC6EDE60C3F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E9949ED2-C9C7-4B7E-B5B7-FC6EDE60C3F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19F6A512-7379-43B0-A1B7-918E6947071F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19F6A512-7379-43B0-A1B7-918E6947071F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19F6A512-7379-43B0-A1B7-918E6947071F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19F6A512-7379-43B0-A1B7-918E6947071F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F18AFDBB-817F-4033-A9BE-1762C6327012}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F18AFDBB-817F-4033-A9BE-1762C6327012}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F18AFDBB-817F-4033-A9BE-1762C6327012}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F18AFDBB-817F-4033-A9BE-1762C6327012}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

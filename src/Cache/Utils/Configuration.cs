@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using GerwimFeiken.Cache.Exceptions;
@@ -8,6 +9,7 @@ namespace GerwimFeiken.Cache.Utils;
 
 public static class Configuration
 {
+    [return: NotNull]
     public static TValue GetRequiredValue<TClass, TValue>(this TClass options, Expression<Func<TClass, TValue>> expression) 
         where TClass : IOptions
     {

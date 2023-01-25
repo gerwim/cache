@@ -13,12 +13,12 @@ namespace GerwimFeiken.Cache
             return this.WriteImplementation(encodedKey, value, expireInSeconds);
         }
 
-        public Task<T> Read<T>(string key)
+        public Task<T?> Read<T>(string key)
         {
             // Convert the key
             string encodedKey = $"{typeof(T)}-{key}".ComputeSha256Hash();
 
-            return this.ReadImplementation<T>(encodedKey);
+            return this.ReadImplementation<T?>(encodedKey);
         }
         
         public Task Delete<T>(string key)
@@ -30,7 +30,7 @@ namespace GerwimFeiken.Cache
         }
 
         protected abstract Task DeleteImplementation(string key);
-        protected abstract Task<T> ReadImplementation<T>(string key);
+        protected abstract Task<T?> ReadImplementation<T>(string key);
         protected abstract Task WriteImplementation<T>(string key, T value, int? expireInSeconds);
     }
 }

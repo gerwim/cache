@@ -19,7 +19,7 @@ namespace GerwimFeiken.Cache
         /// <param name="key"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        Task<T> Read<T>(string key);
+        Task<T?> Read<T>(string key);
 
         /// <summary>
         /// Deletes an object from the cache

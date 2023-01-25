@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Refit;
 
-namespace GerwimFeiken.Cache.Repositories;
+namespace GerwimFeiken.Cache.Cloudflare.Repositories;
 
 [Headers("Authorization: Bearer")]
 public interface ICloudflareApi
@@ -23,6 +23,6 @@ public interface ICloudflareApi
 public record CloudflareResponse
 {
     public bool Success { get; set; }
-    public IEnumerable<string> Errors { get; set; }
-    public IEnumerable<string> Messages { get; set; }
+    public IEnumerable<string>? Errors { get; set; }
+    public IEnumerable<string>? Messages { get; set; }
 }

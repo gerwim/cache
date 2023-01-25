@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
-using GerwimFeiken.Cache.Options;
+using GerwimFeiken.Cache.InMemory.Options;
 using Newtonsoft.Json;
 
-namespace GerwimFeiken.Cache.Implementations
+namespace GerwimFeiken.Cache.InMemory
 {
     public class InMemoryCache : BaseCache
     {
@@ -32,16 +32,16 @@ namespace GerwimFeiken.Cache.Implementations
             return Task.CompletedTask;
         }
 
-        protected override Task<T> ReadImplementation<T>(string key)
+        protected override Task<T?> ReadImplementation<T>(string key) where T : default
         {
             if (!LocalCache.TryGetValue(key, out var value))
-                return Task.FromResult<T>(default);
+                return Task.FromResult<T?>(default);
 
             if (DateTime.UtcNow <= value.expireAtUtc)
-                return Task.FromResult(JsonConvert.DeserializeObject<T>(value.data));
+                return Task.FromResult(JsonConvert.DeserializeObject<T?>(value.data));
             
             LocalCache.TryRemove(key, out _);
-            return Task.FromResult<T>(default);
+            return Task.FromResult<T?>(default);
         }
     }
 }

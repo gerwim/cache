@@ -1,5 +1,5 @@
-﻿using GerwimFeiken.Cache.Implementations;
-using GerwimFeiken.Cache.Options;
+﻿using GerwimFeiken.Cache.InMemory;
+using GerwimFeiken.Cache.InMemory.Options;
 
 namespace Cache.Tests.Integration;
 

@@ -19,39 +19,15 @@ ICache cache = new Provider()
 ```
 ## General configuration
 When creating the provider, you'll need to pass options. These will extend from [options](src/Cache/Options/Options.cs).
-You can override these values when instantiating your provider, e.g.
+You can override these values when instantiating your provider.
 
-```
-ICache cache = new InMemoryCache(new InMemoryOptions
-{
-    DefaultExpirationTtl = 3600
-});
-```
 ### InMemoryCache
-No additional configuration is needed.
+Requires the package `GerwimFeiken.Cache.InMemory`.
 
 ### CloudflareCache
-```
-ICache cache = new CloudflareCache(new CloudflareOptions
-{
-    DefaultExpirationTtl = 86400, // can be omitted
-    ApiToken = "XXX",
-    AccountId = "YYYY",
-    NamespaceId = "ZZZZ"
-});
-```
+Requires the package `GerwimFeiken.Cache.Cloudflare`.
 
-**Api Token**
-
-You can create the ApiToken at the [Cloudflare profile page](https://dash.cloudflare.com/profile/api-tokens). 
-
-**Account and namespace ID**
-
-When visiting the KV dashboard page, you can extract both ID's from the URL:
-`https://dash.cloudflare.com/YYYY/workers/kv/namespaces/ZZZZ`
-
-Where `YYYY` is your `AccountId` and `ZZZZ` is your `NamespaceId`.
-
+See [documentation](src/Cache.Cloudflare/README.md) for additional requirements.
 
 # Development
 ## Tests
