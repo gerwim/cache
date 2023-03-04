@@ -4,6 +4,7 @@
 # Supported providers
 * In memory cache (`InMemoryCache`)
 * Cloudflare KV storage (`CloudflareCache`)
+* Redis (`RedisCache`)
 
 # How to use
 ## Dependency injection
@@ -28,6 +29,11 @@ Requires the package `GerwimFeiken.Cache.InMemory`.
 Requires the package `GerwimFeiken.Cache.Cloudflare`.
 
 See [documentation](src/Cache.Cloudflare/README.md) for additional requirements.
+
+### RedisCache
+Requires the package `GerwimFeiken.Cache.Redis`.
+
+See [documentation](src/Cache.Redis/README.md) for additional requirements.
 
 # Development
 ## Tests
