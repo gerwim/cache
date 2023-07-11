@@ -9,12 +9,11 @@ namespace GerwimFeiken.Cache.InMemory
     public class InMemoryCache : BaseCache
     {
         private readonly IInMemoryOptions _options;
-        private ConcurrentDictionary<string, (DateTime expireAtUtc, string data)> LocalCache { get; }
+        private static ConcurrentDictionary<string, (DateTime expireAtUtc, string data)> LocalCache { get; } = new();
         
         public InMemoryCache(IInMemoryOptions options)
         {
             _options = options;
-            LocalCache = new ConcurrentDictionary<string, (DateTime expireAtUtc, string data)>();
         }
 
         protected override Task DeleteImplementation(string key)
