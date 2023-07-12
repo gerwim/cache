@@ -9,4 +9,9 @@ public interface IRedisOptions : IOptions
     /// See the <a href="https://stackexchange.github.io/StackExchange.Redis/Configuration">official documentation</a>.
     /// </summary>
     public string? Configuration { get; set; }
+
+    /// <summary>
+    /// If set to true, upon timeouts the cache will return default values and drop all writes
+    /// </summary>
+    bool IgnoreTimeouts { get; set; }
 }

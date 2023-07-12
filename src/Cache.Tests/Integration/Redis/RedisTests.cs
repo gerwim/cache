@@ -2,7 +2,7 @@
 using GerwimFeiken.Cache.Redis;
 using GerwimFeiken.Cache.Redis.Options;
 
-namespace Cache.Tests.Integration;
+namespace Cache.Tests.Integration.Redis;
 
 public class RedisTests : BaseTests<RedisCache>, IClassFixture<RedisFixture>
 {
