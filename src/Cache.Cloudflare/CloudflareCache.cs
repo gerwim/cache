@@ -60,7 +60,18 @@ namespace GerwimFeiken.Cache.Cloudflare
                 throw new WriteException("Could not write to Cloudflare, see inner exception for more details.", response.Error);
             }
         }
-        
+
+        protected override async Task WriteImplementation<T>(string key, T value, bool errorIfExists, int? expireInSeconds)
+        {
+            if (errorIfExists)
+            {
+                var exists = await ReadImplementation<T>(key);
+                if (exists is not null) throw new KeyAlreadyExistsException();
+            }
+
+            await WriteImplementation(key, value, expireInSeconds);
+        }
+
         protected override async Task<T?> ReadImplementation<T>(string key) where T : default
         {
             var response = await _cloudflareApi.GetKey(key);

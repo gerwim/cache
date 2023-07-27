@@ -46,6 +46,15 @@ namespace GerwimFeiken.Cache.Redis
 
         protected override async Task WriteImplementation<T>(string key, T value, int? expireInSeconds)
         {
+            await RedisWrite(key, value, expireInSeconds, When.Always);
+        }
+
+        protected override async Task WriteImplementation<T>(string key, T value, bool errorIfExists, int? expireInSeconds)
+        {
+            await RedisWrite(key, value, expireInSeconds, errorIfExists ? When.NotExists : When.Always);
+        }
+        
+        private async Task RedisWrite<T>(string key, T value, int? expireInSeconds, When when) {
             try
             {
                 var redisDb = _redis.GetDatabase();
@@ -55,9 +64,10 @@ namespace GerwimFeiken.Cache.Redis
                 });
 
                 var response =
-                    await redisDb.StringSetAsync(key, json, TimeSpan.FromSeconds(expireInSeconds ?? _expirationTtl));
+                    await redisDb.StringSetAsync(key, json, TimeSpan.FromSeconds(expireInSeconds ?? _expirationTtl), when);
                 if (!response)
                 {
+                    if (when is When.NotExists) throw new KeyAlreadyExistsException();
                     throw new WriteException("Could not write to Redis");
                 }
             }
@@ -74,7 +84,7 @@ namespace GerwimFeiken.Cache.Redis
                 throw;
             }
         }
-        
+
         protected override async Task<T?> ReadImplementation<T>(string key) where T : default
         {
             try
