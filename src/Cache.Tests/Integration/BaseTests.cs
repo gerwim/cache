@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using GerwimFeiken.Cache;
+using GerwimFeiken.Cache.Exceptions;
 using GerwimFeiken.Cache.Options;
 
 namespace Cache.Tests.Integration;
@@ -57,5 +58,27 @@ public abstract class BaseTests<T> where T : BaseCache
         var key = await sut.Read<string>("writeAndDelete");
         // Assert
         key.Should().BeNull();
+    }
+    
+    [Fact] public async Task WriteIfNotExistsTrue()
+    {
+        // Arrange 
+        var sut = (T) Activator.CreateInstance(typeof(T), _options)!;
+        await sut.Write<string>(nameof(WriteIfNotExistsTrue), "unitTest", false);
+        // Act
+        var act = async () => await sut.Write<string>(nameof(WriteIfNotExistsTrue), "unitTest", true);
+        // Assert
+        await act.Should().ThrowAsync<KeyAlreadyExistsException>();
+    }
+    
+    [Fact] public async Task WriteIfNotExistsFalse()
+    {
+        // Arrange 
+        var sut = (T) Activator.CreateInstance(typeof(T), _options)!;
+        await sut.Write<string>(nameof(WriteIfNotExistsFalse), "unitTest", false);
+        // Act
+        var act = async () => await sut.Write<string>(nameof(WriteIfNotExistsFalse), "unitTest", false);
+        // Assert
+        await act.Should().NotThrowAsync<KeyAlreadyExistsException>();
     }
 }

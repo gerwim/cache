@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using GerwimFeiken.Cache.Exceptions;
 using GerwimFeiken.Cache.InMemory.Options;
 using Newtonsoft.Json;
 
@@ -28,6 +29,21 @@ namespace GerwimFeiken.Cache.InMemory
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             }));
+            return Task.CompletedTask;
+        }
+
+        protected override Task WriteImplementation<T>(string key, T value, bool errorIfExists, int? expireInSeconds)
+        {
+            if (!errorIfExists) return WriteImplementation(key, value, expireInSeconds);
+            
+            var success = LocalCache.TryAdd(key,
+                (DateTime.UtcNow.AddSeconds(expireInSeconds ?? _options.DefaultExpirationTtl),
+                    JsonConvert.SerializeObject(value, settings: new JsonSerializerSettings
+                    {
+                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                    })));
+
+            if (!success) throw new KeyAlreadyExistsException();
             return Task.CompletedTask;
         }
 
