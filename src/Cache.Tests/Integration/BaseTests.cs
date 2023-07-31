@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using Cache.Tests.Models;
+using FluentAssertions;
 using GerwimFeiken.Cache;
 using GerwimFeiken.Cache.Exceptions;
 using GerwimFeiken.Cache.Options;
@@ -35,6 +36,24 @@ public abstract class BaseTests<T> where T : BaseCache
         var key = await sut.Read<string>("writeAndRead");
         // Assert
         key.Should().Be("unitTest");
+    }
+    
+    [Fact]
+    public async Task WriteAndReadKey_ComplexObject()
+    {
+        // Arrange 
+        var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
+        var complexObject = new ComplexObject
+        {
+            StringValue = "String",
+            GuidValue = Guid.Empty,
+            DateTimeValue = DateTime.MinValue,
+        };
+        // Act
+        await sut.Write(nameof(WriteAndReadKey_ComplexObject), complexObject);
+        var key = await sut.Read<ComplexObject>(nameof(WriteAndReadKey_ComplexObject));
+        // Assert
+        key.Should().Be(complexObject);
     }
 
     [Fact]
@@ -75,6 +94,19 @@ public abstract class BaseTests<T> where T : BaseCache
         var act = async () => await sut.Write<string>(nameof(WriteIfNotExistsTrue), "unitTest", true);
         // Assert
         await act.Should().ThrowAsync<KeyAlreadyExistsException>();
+    }
+    
+    [Fact]
+    public async Task WriteIfNotExistsTrue_Expired()
+    {
+        // Arrange 
+        var sut = (T) Activator.CreateInstance(typeof(T), _options)!;
+        await sut.Write<string>(nameof(WriteIfNotExistsTrue_Expired), "unitTest", false, 60);
+        // Act
+        await Task.Delay(61000);
+        var act = async () => await sut.Write<string>(nameof(WriteIfNotExistsTrue_Expired), "unitTest", true);
+        // Assert
+        await act.Should().NotThrowAsync<KeyAlreadyExistsException>();
     }
     
     [Fact]
