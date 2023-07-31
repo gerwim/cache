@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
 using GerwimFeiken.Cache.Exceptions;
 using GerwimFeiken.Cache.InMemory.Options;
@@ -11,6 +12,7 @@ namespace GerwimFeiken.Cache.InMemory
     {
         private readonly IInMemoryOptions _options;
         private static ConcurrentDictionary<string, (DateTime expireAtUtc, string data)> LocalCache { get; } = new();
+        private readonly SemaphoreSlim _writeLock = new(1, 1);
         
         public InMemoryCache(IInMemoryOptions options)
         {
@@ -23,28 +25,44 @@ namespace GerwimFeiken.Cache.InMemory
             return Task.CompletedTask;
         }
 
-        protected override Task WriteImplementation<T>(string key, T value, int? expireInSeconds)
+        protected override async Task WriteImplementation<T>(string key, T value, int? expireInSeconds)
         {
-            LocalCache[key] = (DateTime.UtcNow.AddSeconds(expireInSeconds ?? _options.DefaultExpirationTtl), JsonConvert.SerializeObject(value, settings: new JsonSerializerSettings
+            try
             {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-            }));
-            return Task.CompletedTask;
+                await _writeLock.WaitAsync();
+                WriteToLocalDictionary(key, value, expireInSeconds);
+            }
+            finally
+            {
+                _writeLock.Release();
+            }
         }
 
-        protected override Task WriteImplementation<T>(string key, T value, bool errorIfExists, int? expireInSeconds)
+        protected override async Task WriteImplementation<T>(string key, T value, bool errorIfExists, int? expireInSeconds)
         {
-            if (!errorIfExists) return WriteImplementation(key, value, expireInSeconds);
+            if (!errorIfExists)
+            {
+                await WriteImplementation(key, value, expireInSeconds);
+                return;
+            }
             
-            var success = LocalCache.TryAdd(key,
-                (DateTime.UtcNow.AddSeconds(expireInSeconds ?? _options.DefaultExpirationTtl),
-                    JsonConvert.SerializeObject(value, settings: new JsonSerializerSettings
-                    {
-                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                    })));
-
-            if (!success) throw new KeyAlreadyExistsException();
-            return Task.CompletedTask;
+            try
+            {
+                await _writeLock.WaitAsync();
+                
+                // Read key -- to make sure it's deleted if expired and to check whether it exists
+                var existingValue = await ReadImplementation<T>(key);
+                if (existingValue is not null)
+                {
+                    throw new KeyAlreadyExistsException();
+                }
+                
+                WriteToLocalDictionary(key, value, expireInSeconds);
+            }
+            finally
+            {
+                _writeLock.Release();
+            }
         }
 
         protected override Task<T?> ReadImplementation<T>(string key) where T : default
@@ -57,6 +75,22 @@ namespace GerwimFeiken.Cache.InMemory
             
             LocalCache.TryRemove(key, out _);
             return Task.FromResult<T?>(default);
+        }
+
+        /// <summary>
+        /// Write to local dictionary
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <param name="expireInSeconds"></param>
+        /// <typeparam name="T"></typeparam>
+        private void WriteToLocalDictionary<T>(string key, T value, int? expireInSeconds)
+        {
+            LocalCache[key] = (DateTime.UtcNow.AddSeconds(expireInSeconds ?? _options.DefaultExpirationTtl),
+                JsonConvert.SerializeObject(value, settings: new JsonSerializerSettings
+                {
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                }));
         }
     }
 }
