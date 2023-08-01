@@ -52,7 +52,7 @@ namespace GerwimFeiken.Cache.InMemory
                 
                 // Read key -- to make sure it's deleted if expired and to check whether it exists
                 var existingValue = await ReadImplementation<T>(key);
-                if (existingValue is not null)
+                if (!Equals(existingValue, default(T)))
                 {
                     throw new KeyAlreadyExistsException();
                 }

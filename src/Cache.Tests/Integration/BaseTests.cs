@@ -85,13 +85,37 @@ public abstract class BaseTests<T> where T : BaseCache
     }
     
     [Fact]
-    public async Task WriteIfNotExistsTrue()
+    public async Task WriteIfNotExistsTrue_String()
     {
         // Arrange 
         var sut = (T) Activator.CreateInstance(typeof(T), _options)!;
-        await sut.Write<string>(nameof(WriteIfNotExistsTrue), "unitTest", true, 5);
+        await sut.Write<string>(nameof(WriteIfNotExistsTrue_String), "unitTest", true, 5);
         // Act
-        var act = async () => await sut.Write<string>(nameof(WriteIfNotExistsTrue), "unitTest", true, 5);
+        var act = async () => await sut.Write<string>(nameof(WriteIfNotExistsTrue_String), "unitTest", true, 5);
+        // Assert
+        await act.Should().ThrowAsync<KeyAlreadyExistsException>();
+    }
+    
+    [Fact]
+    public async Task WriteIfNotExistsTrue_Bool()
+    {
+        // Arrange 
+        var sut = (T) Activator.CreateInstance(typeof(T), _options)!;
+        await sut.Write(nameof(WriteIfNotExistsTrue_Bool), true, true, 5);
+        // Act
+        var act = async () => await sut.Write(nameof(WriteIfNotExistsTrue_Bool), true, true, 5);
+        // Assert
+        await act.Should().ThrowAsync<KeyAlreadyExistsException>();
+    }
+    
+    [Fact]
+    public async Task WriteIfNotExistsTrue_NullableBool()
+    {
+        // Arrange 
+        var sut = (T) Activator.CreateInstance(typeof(T), _options)!;
+        await sut.Write<bool?>(nameof(WriteIfNotExistsTrue_Bool), true, true, 5);
+        // Act
+        var act = async () => await sut.Write<bool?>(nameof(WriteIfNotExistsTrue_Bool), true, true, 5);
         // Assert
         await act.Should().ThrowAsync<KeyAlreadyExistsException>();
     }

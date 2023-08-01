@@ -8,7 +8,7 @@
         <LangVersion>10</LangVersion>
 
         <PackageId>GerwimFeiken.Cache.InMemory</PackageId>
-        <Version>1.2.2</Version>
+        <Version>1.2.3</Version>
         <PackageTags>Cache;Key value;keyvalue;</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageReadmeFile>README.md</PackageReadmeFile>
