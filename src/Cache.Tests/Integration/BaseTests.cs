@@ -89,9 +89,9 @@ public abstract class BaseTests<T> where T : BaseCache
     {
         // Arrange 
         var sut = (T) Activator.CreateInstance(typeof(T), _options)!;
-        await sut.Write<string>(nameof(WriteIfNotExistsTrue), "unitTest", false);
+        await sut.Write<string>(nameof(WriteIfNotExistsTrue), "unitTest", true, 5);
         // Act
-        var act = async () => await sut.Write<string>(nameof(WriteIfNotExistsTrue), "unitTest", true);
+        var act = async () => await sut.Write<string>(nameof(WriteIfNotExistsTrue), "unitTest", true, 5);
         // Assert
         await act.Should().ThrowAsync<KeyAlreadyExistsException>();
     }

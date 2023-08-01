@@ -12,7 +12,7 @@ namespace GerwimFeiken.Cache.InMemory
     {
         private readonly IInMemoryOptions _options;
         private static ConcurrentDictionary<string, (DateTime expireAtUtc, string data)> LocalCache { get; } = new();
-        private readonly SemaphoreSlim _writeLock = new(1, 1);
+        private static readonly SemaphoreSlim WriteLock = new(1, 1);
         
         public InMemoryCache(IInMemoryOptions options)
         {
@@ -29,12 +29,12 @@ namespace GerwimFeiken.Cache.InMemory
         {
             try
             {
-                await _writeLock.WaitAsync();
+                await WriteLock.WaitAsync();
                 WriteToLocalDictionary(key, value, expireInSeconds);
             }
             finally
             {
-                _writeLock.Release();
+                WriteLock.Release();
             }
         }
 
@@ -48,7 +48,7 @@ namespace GerwimFeiken.Cache.InMemory
             
             try
             {
-                await _writeLock.WaitAsync();
+                await WriteLock.WaitAsync();
                 
                 // Read key -- to make sure it's deleted if expired and to check whether it exists
                 var existingValue = await ReadImplementation<T>(key);
@@ -61,7 +61,7 @@ namespace GerwimFeiken.Cache.InMemory
             }
             finally
             {
-                _writeLock.Release();
+                WriteLock.Release();
             }
         }
 
