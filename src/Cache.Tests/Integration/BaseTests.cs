@@ -96,14 +96,16 @@ public abstract class BaseTests<T> where T : BaseCache
         await act.Should().ThrowAsync<KeyAlreadyExistsException>();
     }
     
-    [Fact]
-    public async Task WriteIfNotExistsTrue_Bool()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task WriteIfNotExistsTrue_Bool(bool value)
     {
         // Arrange 
         var sut = (T) Activator.CreateInstance(typeof(T), _options)!;
-        await sut.Write(nameof(WriteIfNotExistsTrue_Bool), true, true, 5);
+        await sut.Write($"{nameof(WriteIfNotExistsTrue_Bool)}_{value}", value, true, 5);
         // Act
-        var act = async () => await sut.Write(nameof(WriteIfNotExistsTrue_Bool), true, true, 5);
+        var act = async () => await sut.Write($"{nameof(WriteIfNotExistsTrue_Bool)}_{value}", value, true, 5);
         // Assert
         await act.Should().ThrowAsync<KeyAlreadyExistsException>();
     }

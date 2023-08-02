@@ -30,7 +30,7 @@ namespace GerwimFeiken.Cache.InMemory
             try
             {
                 await WriteLock.WaitAsync();
-                WriteToLocalDictionary(key, value, expireInSeconds);
+                LocalCache[key] = ConvertValue(value, expireInSeconds);
             }
             finally
             {
@@ -50,14 +50,13 @@ namespace GerwimFeiken.Cache.InMemory
             {
                 await WriteLock.WaitAsync();
                 
-                // Read key -- to make sure it's deleted if expired and to check whether it exists
-                var existingValue = await ReadImplementation<T>(key);
-                if (!Equals(existingValue, default(T)))
+                // Read key -- to make sure it's deleted if expired
+                _ = await ReadImplementation<T>(key);
+
+                if (!LocalCache.TryAdd(key, ConvertValue(value, expireInSeconds)))
                 {
                     throw new KeyAlreadyExistsException();
                 }
-                
-                WriteToLocalDictionary(key, value, expireInSeconds);
             }
             finally
             {
@@ -77,16 +76,9 @@ namespace GerwimFeiken.Cache.InMemory
             return Task.FromResult<T?>(default);
         }
 
-        /// <summary>
-        /// Write to local dictionary
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        /// <param name="expireInSeconds"></param>
-        /// <typeparam name="T"></typeparam>
-        private void WriteToLocalDictionary<T>(string key, T value, int? expireInSeconds)
+        private (DateTime expireAtUtc, string data) ConvertValue<T>(T value, int? expireInSeconds)
         {
-            LocalCache[key] = (DateTime.UtcNow.AddSeconds(expireInSeconds ?? _options.DefaultExpirationTtl),
+            return (DateTime.UtcNow.AddSeconds(expireInSeconds ?? _options.DefaultExpirationTtl),
                 JsonConvert.SerializeObject(value, settings: new JsonSerializerSettings
                 {
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore
