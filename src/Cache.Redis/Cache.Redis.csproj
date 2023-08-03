@@ -8,7 +8,7 @@
         <LangVersion>10</LangVersion>
 
         <PackageId>GerwimFeiken.Cache.Redis</PackageId>
-        <Version>1.3.0</Version>
+        <Version>1.3.1</Version>
         <PackageTags>Cache;Key value;keyvalue;Redis</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageReadmeFile>README.md</PackageReadmeFile>
