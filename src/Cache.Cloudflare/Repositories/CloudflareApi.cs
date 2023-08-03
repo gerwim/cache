@@ -1,28 +1,57 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using Refit;
 
 namespace GerwimFeiken.Cache.Cloudflare.Repositories;
-
-[Headers("Authorization: Bearer")]
-public interface ICloudflareApi
+public class CloudflareApi
 {
-    [Get("/values/{id}")]
-    public Task<ApiResponse<string>> GetKey([AliasAs("id")] string keyId);
-    
-    [Delete("/values/{id}")]
-    public Task<ApiResponse<CloudflareResponse>> DeleteKey([AliasAs("id")] string keyId);
-    
-    [Put("/values/{id}")]
-    public Task<ApiResponse<string>> WriteKey(
-        [AliasAs("id")] string keyId,
-        [Query] [AliasAs("expiration_ttl")] int expirationTtl,
-        [Body] string content);
-}
+    private static readonly HttpClient HttpClient = new();
+    private readonly string _apiUrl;
+    private readonly string _apiToken;
 
-public record CloudflareResponse
-{
-    public bool Success { get; set; }
-    public IEnumerable<string>? Errors { get; set; }
-    public IEnumerable<string>? Messages { get; set; }
+    public CloudflareApi(string apiUrl, string apiToken)
+    {
+        _apiUrl = apiUrl;
+        _apiToken = apiToken;
+    }
+    
+    public async Task<HttpResponseMessage> GetKey(string keyId)
+    {
+        var request = new HttpRequestMessage
+        {
+            RequestUri = new Uri($"{_apiUrl}/values/{keyId}"),
+            Method = HttpMethod.Get,
+        };
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiToken);
+
+        return await HttpClient.SendAsync(request);
+    }
+    
+    public async Task<HttpResponseMessage> DeleteKey(string keyId)
+    {
+        var request = new HttpRequestMessage
+        {
+            RequestUri = new Uri($"{_apiUrl}/values/{keyId}"),
+            Method = HttpMethod.Delete,
+        };
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiToken);
+
+        return await HttpClient.SendAsync(request);
+    }
+    
+    public async Task<HttpResponseMessage> WriteKey(string keyId, int expirationTtl, string content)
+    {
+        var request = new HttpRequestMessage
+        {
+            RequestUri = new Uri($"{_apiUrl}/values/{keyId}?expiration_ttl={expirationTtl}"),
+            Method = HttpMethod.Put,
+        };
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiToken);
+
+        request.Content = new StringContent(content);
+
+        return await HttpClient.SendAsync(request);
+    }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using GerwimFeiken.Cache.Cloudflare.Options;
@@ -8,14 +7,13 @@ using GerwimFeiken.Cache.Exceptions;
 using GerwimFeiken.Cache.Models;
 using GerwimFeiken.Cache.Utils;
 using Newtonsoft.Json;
-using Refit;
 
 namespace GerwimFeiken.Cache.Cloudflare
 {
     public class CloudflareCache : BaseCache
     {
         private readonly int _expirationTtl;
-        private readonly ICloudflareApi _cloudflareApi;
+        private readonly CloudflareApi _cloudflareApi;
         
         public CloudflareCache(ICloudflareOptions options)
         {
@@ -27,10 +25,7 @@ namespace GerwimFeiken.Cache.Cloudflare
             var apiUrl = $"https://api.cloudflare.com/client/v4/accounts/{accountId}/storage/kv/namespaces/{namespaceId}";
             var apiToken = options.GetRequiredValue(x => x.ApiToken);
 
-            _cloudflareApi = RestService.For<ICloudflareApi>(apiUrl, new RefitSettings
-            {
-                AuthorizationHeaderValueGetter = () => Task.FromResult(apiToken)
-            });
+            _cloudflareApi = new CloudflareApi(apiUrl, apiToken);
 
             _expirationTtl = options.GetRequiredValue(x => x.DefaultExpirationTtl);
         }
@@ -39,9 +34,9 @@ namespace GerwimFeiken.Cache.Cloudflare
         {
             var response = await _cloudflareApi.DeleteKey(key);
 
-            if (response.Error is not null && response.StatusCode != HttpStatusCode.NotFound)
+            if (!response.IsSuccessStatusCode && response.StatusCode != HttpStatusCode.NotFound)
             {
-                throw new DeleteException("Could not delete from Cloudflare, see inner exception for more details.", response.Error);
+                throw new DeleteException($"Could not delete from Cloudflare: {await response.Content.ReadAsStringAsync()}");
             }
         }
 
@@ -57,9 +52,9 @@ namespace GerwimFeiken.Cache.Cloudflare
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             });
             var response = await _cloudflareApi.WriteKey(key, expireInSeconds ?? _expirationTtl, json);
-            if (response.Error is not null)
+            if (!response.IsSuccessStatusCode)
             {
-                throw new WriteException("Could not write to Cloudflare, see inner exception for more details.", response.Error);
+                throw new WriteException($"Could not write to Cloudflare: {await response.Content.ReadAsStringAsync()}");
             }
 
             return WriteResult.Ok();
@@ -82,14 +77,14 @@ namespace GerwimFeiken.Cache.Cloudflare
         {
             var response = await _cloudflareApi.GetKey(key);
 
-            if (response.Error is not null && response.StatusCode is not HttpStatusCode.NotFound)
+            if (!response.IsSuccessStatusCode && response.StatusCode is not HttpStatusCode.NotFound)
             {
-                throw new ReadException("Could not read from Cloudflare, see inner exception for more details.", response.Error);
+                throw new ReadException($"Could not read from Cloudflare: {await response.Content.ReadAsStringAsync()}");
             }
 
-            if (response.Content is null) return ReadResult<T?>.Fail(default, ReadReason.KeyDoesNotExist);
+            if (response.Content is null || response.StatusCode is HttpStatusCode.NotFound) return ReadResult<T?>.Fail(default, ReadReason.KeyDoesNotExist);
 
-            var obj = JsonConvert.DeserializeObject<T>(response.Content);
+            var obj = JsonConvert.DeserializeObject<T>(await response.Content.ReadAsStringAsync());
             return ReadResult<T?>.Ok(obj);
         }
     }
