@@ -55,6 +55,20 @@ public abstract class BaseTests<T> where T : BaseCache
         // Assert
         key.Should().Be(complexObject);
     }
+    
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task WriteAndReadKey_Bool(bool value)
+    {
+        // Arrange 
+        var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
+        // Act
+        await sut.Write($"{nameof(WriteAndReadKey_Bool)}_{value}", value);
+        var key = await sut.Read<bool>($"{nameof(WriteAndReadKey_Bool)}_{value}");
+        // Assert
+        key.Should().Be(value);
+    }
 
     [Fact]
     public async Task WriteAndReadKey_Expired()
@@ -62,10 +76,10 @@ public abstract class BaseTests<T> where T : BaseCache
         // Arrange 
         var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
         // Act
-        await sut.Write<string>("writeAndRead", "unitTest", 60);
-        var key1 = await sut.Read<string>("writeAndRead");
+        await sut.Write<string>(nameof(WriteAndReadKey_Expired), "unitTest", 60);
+        var key1 = await sut.Read<string>(nameof(WriteAndReadKey_Expired));
         await Task.Delay(61000);
-        var key2 = await sut.Read<string>("writeAndRead");
+        var key2 = await sut.Read<string>(nameof(WriteAndReadKey_Expired));
         // Assert
         key1.Should().Be("unitTest");
         key2.Should().BeNull();
@@ -88,10 +102,11 @@ public abstract class BaseTests<T> where T : BaseCache
     public async Task WriteIfNotExistsTrue_String()
     {
         // Arrange 
+        var key = Guid.NewGuid().ToString(); // we set a random value because it's an integration test. Two tests after another might conflict with some providers
         var sut = (T) Activator.CreateInstance(typeof(T), _options)!;
-        await sut.Write<string>(nameof(WriteIfNotExistsTrue_String), "unitTest", true, 5);
+        await sut.Write<string>(key, "unitTest", true, 60);
         // Act
-        var act = async () => await sut.Write<string>(nameof(WriteIfNotExistsTrue_String), "unitTest", true, 5);
+        var act = async () => await sut.Write<string>(key, "unitTest", true, 60);
         // Assert
         await act.Should().ThrowAsync<KeyAlreadyExistsException>();
     }
@@ -102,10 +117,11 @@ public abstract class BaseTests<T> where T : BaseCache
     public async Task WriteIfNotExistsTrue_Bool(bool value)
     {
         // Arrange 
+        var key = Guid.NewGuid().ToString(); // we set a random value because it's an integration test. Two tests after another might conflict with some providers
         var sut = (T) Activator.CreateInstance(typeof(T), _options)!;
-        await sut.Write($"{nameof(WriteIfNotExistsTrue_Bool)}_{value}", value, true, 5);
+        await sut.Write(key, value, true, 60);
         // Act
-        var act = async () => await sut.Write($"{nameof(WriteIfNotExistsTrue_Bool)}_{value}", value, true, 5);
+        var act = async () => await sut.Write(key, value, true, 60);
         // Assert
         await act.Should().ThrowAsync<KeyAlreadyExistsException>();
     }
@@ -113,11 +129,12 @@ public abstract class BaseTests<T> where T : BaseCache
     [Fact]
     public async Task WriteIfNotExistsTrue_NullableBool()
     {
-        // Arrange 
+        // Arrange
+        var key = Guid.NewGuid().ToString(); // we set a random value because it's an integration test. Two tests after another might conflict with some providers
         var sut = (T) Activator.CreateInstance(typeof(T), _options)!;
-        await sut.Write<bool?>(nameof(WriteIfNotExistsTrue_Bool), true, true, 5);
+        await sut.Write<bool?>(key, true, true, 60);
         // Act
-        var act = async () => await sut.Write<bool?>(nameof(WriteIfNotExistsTrue_Bool), true, true, 5);
+        var act = async () => await sut.Write<bool?>(key, true, true, 60);
         // Assert
         await act.Should().ThrowAsync<KeyAlreadyExistsException>();
     }

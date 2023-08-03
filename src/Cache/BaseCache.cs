@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using GerwimFeiken.Cache.Models;
 using GerwimFeiken.Cache.Utils.Extensions;
 
 namespace GerwimFeiken.Cache
@@ -10,7 +11,7 @@ namespace GerwimFeiken.Cache
             // Convert the key
             string encodedKey = $"{typeof(T)}-{key}".ComputeSha256Hash();
             
-            return this.WriteImplementation(encodedKey, value, expireInSeconds);
+            return WriteImplementation(encodedKey, value, expireInSeconds);
         }
 
         public Task Write<T>(string key, T value, bool errorIfExists, int? expireInSeconds = null)
@@ -18,15 +19,15 @@ namespace GerwimFeiken.Cache
             // Convert the key
             string encodedKey = $"{typeof(T)}-{key}".ComputeSha256Hash();
             
-            return this.WriteImplementation(encodedKey, value, errorIfExists, expireInSeconds);
+            return WriteImplementation(encodedKey, value, errorIfExists, expireInSeconds);
         }
 
-        public Task<T?> Read<T>(string key)
+        public async Task<T?> Read<T>(string key)
         {
             // Convert the key
             string encodedKey = $"{typeof(T)}-{key}".ComputeSha256Hash();
 
-            return this.ReadImplementation<T?>(encodedKey);
+            return (await ReadImplementation<T?>(encodedKey)).Value;
         }
         
         public Task Delete<T>(string key)
@@ -34,12 +35,12 @@ namespace GerwimFeiken.Cache
             // Convert the key
             string encodedKey = $"{typeof(T)}-{key}".ComputeSha256Hash();
             
-            return this.DeleteImplementation(encodedKey);
+            return DeleteImplementation(encodedKey);
         }
 
         protected abstract Task DeleteImplementation(string key);
-        protected abstract Task<T?> ReadImplementation<T>(string key);
-        protected abstract Task WriteImplementation<T>(string key, T value, int? expireInSeconds);
-        protected abstract Task WriteImplementation<T>(string key, T value, bool errorIfExists, int? expireInSeconds);
+        protected abstract Task<ReadResult<T?>> ReadImplementation<T>(string key);
+        protected abstract Task<WriteResult> WriteImplementation<T>(string key, T value, int? expireInSeconds);
+        protected abstract Task<WriteResult> WriteImplementation<T>(string key, T value, bool errorIfExists, int? expireInSeconds);
     }
 }

@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using GerwimFeiken.Cache.Cloudflare.Options;
 using GerwimFeiken.Cache.Cloudflare.Repositories;
 using GerwimFeiken.Cache.Exceptions;
+using GerwimFeiken.Cache.Models;
 using GerwimFeiken.Cache.Utils;
 using Newtonsoft.Json;
 using Refit;
@@ -43,7 +45,7 @@ namespace GerwimFeiken.Cache.Cloudflare
             }
         }
 
-        protected override async Task WriteImplementation<T>(string key, T value, int? expireInSeconds)
+        protected override async Task<WriteResult> WriteImplementation<T>(string key, T value, int? expireInSeconds)
         {
             if ((expireInSeconds ?? _expirationTtl) < 60)
             {
@@ -59,32 +61,36 @@ namespace GerwimFeiken.Cache.Cloudflare
             {
                 throw new WriteException("Could not write to Cloudflare, see inner exception for more details.", response.Error);
             }
+
+            return WriteResult.Ok();
         }
 
-        protected override async Task WriteImplementation<T>(string key, T value, bool errorIfExists, int? expireInSeconds)
+        protected override async Task<WriteResult> WriteImplementation<T>(string key, T value, bool errorIfExists, int? expireInSeconds)
         {
             if (errorIfExists)
             {
-                var exists = await ReadImplementation<T>(key);
-                if (exists is not null) throw new KeyAlreadyExistsException();
+                var result = await ReadImplementation<T?>(key);
+                if (result.OperationStatus is Status.Ok) throw new KeyAlreadyExistsException();
             }
 
             await WriteImplementation(key, value, expireInSeconds);
+
+            return WriteResult.Ok();
         }
 
-        protected override async Task<T?> ReadImplementation<T>(string key) where T : default
+        protected override async Task<ReadResult<T?>> ReadImplementation<T>(string key) where T : default
         {
             var response = await _cloudflareApi.GetKey(key);
 
-            if (response.Error is not null && response.StatusCode != HttpStatusCode.NotFound)
+            if (response.Error is not null && response.StatusCode is not HttpStatusCode.NotFound)
             {
                 throw new ReadException("Could not read from Cloudflare, see inner exception for more details.", response.Error);
             }
 
-            if (response.Content == null) return default;
+            if (response.Content is null) return ReadResult<T?>.Fail(default, ReadReason.KeyDoesNotExist);
 
             var obj = JsonConvert.DeserializeObject<T>(response.Content);
-            return obj;
+            return ReadResult<T?>.Ok(obj);
         }
     }
 }

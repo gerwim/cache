@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using GerwimFeiken.Cache.Exceptions;
 using GerwimFeiken.Cache.InMemory.Options;
+using GerwimFeiken.Cache.Models;
 using Newtonsoft.Json;
 
 namespace GerwimFeiken.Cache.InMemory
@@ -25,31 +26,36 @@ namespace GerwimFeiken.Cache.InMemory
             return Task.CompletedTask;
         }
 
-        protected override async Task WriteImplementation<T>(string key, T value, int? expireInSeconds)
+        protected override async Task<WriteResult> WriteImplementation<T>(string key, T value, int? expireInSeconds)
         {
             try
             {
                 await WriteLock.WaitAsync();
                 LocalCache[key] = ConvertValue(value, expireInSeconds);
             }
+            catch
+            {
+                return WriteResult.Fail();
+            }
             finally
             {
                 WriteLock.Release();
             }
+            
+            return WriteResult.Ok();
         }
 
-        protected override async Task WriteImplementation<T>(string key, T value, bool errorIfExists, int? expireInSeconds)
+        protected override async Task<WriteResult> WriteImplementation<T>(string key, T value, bool errorIfExists, int? expireInSeconds)
         {
             if (!errorIfExists)
             {
-                await WriteImplementation(key, value, expireInSeconds);
-                return;
+                return await WriteImplementation(key, value, expireInSeconds);
             }
-            
+
             try
             {
                 await WriteLock.WaitAsync();
-                
+
                 // Read key -- to make sure it's deleted if expired
                 _ = await ReadImplementation<T>(key);
 
@@ -62,18 +68,20 @@ namespace GerwimFeiken.Cache.InMemory
             {
                 WriteLock.Release();
             }
+
+            return WriteResult.Ok();
         }
 
-        protected override Task<T?> ReadImplementation<T>(string key) where T : default
+        protected override Task<ReadResult<T?>> ReadImplementation<T>(string key) where T : default
         {
             if (!LocalCache.TryGetValue(key, out var value))
-                return Task.FromResult<T?>(default);
+                return Task.FromResult(ReadResult<T?>.Fail(default, ReadReason.KeyDoesNotExist));
 
             if (DateTime.UtcNow <= value.expireAtUtc)
-                return Task.FromResult(JsonConvert.DeserializeObject<T?>(value.data));
+                return Task.FromResult(ReadResult<T?>.Ok(JsonConvert.DeserializeObject<T?>(value.data)));
             
             LocalCache.TryRemove(key, out _);
-            return Task.FromResult<T?>(default);
+            return Task.FromResult(ReadResult<T?>.Fail(default, ReadReason.KeyDoesNotExist));
         }
 
         private (DateTime expireAtUtc, string data) ConvertValue<T>(T value, int? expireInSeconds)
