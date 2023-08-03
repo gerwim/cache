@@ -15,12 +15,12 @@ public class RedisUnavailableTests
     {
         _options = new RedisOptions
         {
-            Configuration = "127.0.0.1,abortConnect=false,connectTimeout=1000,connectRetry=0",
+            Configuration = "127.0.0.2,abortConnect=false,connectTimeout=1000,connectRetry=0",
             IgnoreTimeouts = false,
         };
         _optionsWithIgnore = new RedisOptions
         {
-            Configuration = "127.0.0.1,abortConnect=false,connectTimeout=1000,connectRetry=0",
+            Configuration = "127.0.0.2,abortConnect=false,connectTimeout=1000,connectRetry=0",
             IgnoreTimeouts = true,
         };
     }
