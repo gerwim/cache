@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using GerwimFeiken.Cache.Models;
 using GerwimFeiken.Cache.Utils.Extensions;
 
@@ -13,6 +14,14 @@ namespace GerwimFeiken.Cache
             
             return WriteImplementation(encodedKey, value, expireInSeconds);
         }
+        
+        public Task Write<T>(string key, T value, TimeSpan expireIn)
+        {
+            // Convert the key
+            string encodedKey = $"{typeof(T)}-{key}".ComputeSha256Hash();
+            
+            return WriteImplementation(encodedKey, value, (int) expireIn.TotalSeconds);
+        }
 
         public Task Write<T>(string key, T value, bool errorIfExists, int? expireInSeconds = null)
         {
@@ -20,6 +29,14 @@ namespace GerwimFeiken.Cache
             string encodedKey = $"{typeof(T)}-{key}".ComputeSha256Hash();
             
             return WriteImplementation(encodedKey, value, errorIfExists, expireInSeconds);
+        }
+        
+        public Task Write<T>(string key, T value, bool errorIfExists, TimeSpan expireIn)
+        {
+            // Convert the key
+            string encodedKey = $"{typeof(T)}-{key}".ComputeSha256Hash();
+            
+            return WriteImplementation(encodedKey, value, errorIfExists, (int) expireIn.TotalSeconds);
         }
 
         public async Task<T?> Read<T>(string key)
