@@ -17,7 +17,10 @@ namespace GerwimFeiken.Cache
         
         public Task Write<T>(string key, T value, TimeSpan expireIn)
         {
-            return Write(key, value, (int) expireIn.TotalSeconds);
+            var seconds = expireIn.TotalSeconds;
+            if (seconds > Int32.MaxValue) seconds = Int32.MaxValue;
+            
+            return Write(key, value, (int) seconds);
         }
 
         public Task Write<T>(string key, T value, bool errorIfExists, int? expireInSeconds = null)
@@ -30,7 +33,10 @@ namespace GerwimFeiken.Cache
         
         public Task Write<T>(string key, T value, bool errorIfExists, TimeSpan expireIn)
         {
-           return Write(key, value, errorIfExists, (int) expireIn.TotalSeconds);
+            var seconds = expireIn.TotalSeconds;
+            if (seconds > Int32.MaxValue) seconds = Int32.MaxValue;
+            
+            return Write(key, value, errorIfExists, (int) seconds);
         }
 
         public async Task<T?> ReadOrWrite<T>(string key, Func<T> func, int? expireInSeconds = null)
@@ -57,12 +63,18 @@ namespace GerwimFeiken.Cache
         
         public async Task<T?> ReadOrWrite<T>(string key, Func<T> func, TimeSpan expireIn)
         {
-            return await ReadOrWrite(key, func, (int) expireIn.TotalSeconds);
+            var seconds = expireIn.TotalSeconds;
+            if (seconds > Int32.MaxValue) seconds = Int32.MaxValue;
+            
+            return await ReadOrWrite(key, func, (int) seconds);
         }
         
         public async Task<T?> ReadOrWrite<T>(string key, Func<Task<T>> func, TimeSpan expireIn)
         {
-            return await ReadOrWrite(key, func, (int) expireIn.TotalSeconds);
+            var seconds = expireIn.TotalSeconds;
+            if (seconds > Int32.MaxValue) seconds = Int32.MaxValue;
+            
+            return await ReadOrWrite(key, func, (int) seconds);
         }
 
         public async Task<T?> Read<T>(string key)
