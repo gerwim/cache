@@ -32,6 +32,37 @@ namespace GerwimFeiken.Cache
         {
            return Write(key, value, errorIfExists, (int) expireIn.TotalSeconds);
         }
+
+        public async Task<T?> ReadOrWrite<T>(string key, Func<T> func, int? expireInSeconds = null)
+        {
+            var existingValue = await Read<T>(key);
+            if (existingValue is not null) return existingValue;
+            
+            var result = func();
+            
+            if (result is not null) await Write(key, result, expireInSeconds);
+            return result;
+        }
+
+        public async Task<T?> ReadOrWrite<T>(string key, Func<Task<T>> func, int? expireInSeconds = null)
+        {
+            var existingValue = await Read<T>(key);
+            if (existingValue is not null) return existingValue;
+
+            var result = await func();
+
+            if (result is not null) await Write(key, result, expireInSeconds);
+            return result;
+        }
+        
+        public async Task<T?> ReadOrWrite<T>(string key, Func<T> func, TimeSpan expireIn)
+        {
+            return await ReadOrWrite(key, func, (int) expireIn.TotalSeconds);
+        }
+        
+        public async Task<T?> ReadOrWrite<T>(string key, Func<Task<T>> func, TimeSpan expireIn)
+        {
+            return await ReadOrWrite(key, func, (int) expireIn.TotalSeconds);
         }
 
         public async Task<T?> Read<T>(string key)

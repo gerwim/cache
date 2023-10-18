@@ -25,6 +25,62 @@ public abstract class BaseTests<T> where T : BaseCache
         // Assert
         key.Should().BeNull();
     }
+    
+    [Fact]
+    public async Task ReadOrWrite()
+    {
+        // Arrange 
+        var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
+        var key = nameof(ReadOrWrite);
+        // Act
+        var result1 = await sut.ReadOrWrite<string>(key, () => "unitTest");
+        var result2 = await sut.Read<string>(key);
+        // Assert
+        result1.Should().Be("unitTest");
+        result2.Should().Be("unitTest");
+    }
+    
+    [Fact]
+    public async Task ReadOrWrite_ASync()
+    {
+        // Arrange 
+        var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
+        var key = nameof(ReadOrWrite_ASync);
+        // Act
+        var result1 = await sut.ReadOrWrite<string>(key, async () => await Task.FromResult("unitTest"));
+        var result2 = await sut.Read<string>(key);
+        // Assert
+        result1.Should().Be("unitTest");
+        result2.Should().Be("unitTest");
+    }
+    
+    [Fact]
+    public async Task ReadOrWrite_TimeSpan()
+    {
+        // Arrange 
+        var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
+        var key = nameof(ReadOrWrite_TimeSpan);
+        // Act
+        var result1 = await sut.ReadOrWrite<string>(key, () => "unitTest", TimeSpan.MaxValue);
+        var result2 = await sut.Read<string>(key);
+        // Assert
+        result1.Should().Be("unitTest");
+        result2.Should().Be("unitTest");
+    }
+    
+    [Fact]
+    public async Task ReadOrWrite_TimeSpan_ASync()
+    {
+        // Arrange 
+        var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
+        var key = nameof(ReadOrWrite_TimeSpan_ASync);
+        // Act
+        var result1 = await sut.ReadOrWrite<string>(nameof(ReadOrWrite_TimeSpan_ASync), async () => await Task.FromResult("unitTest"), TimeSpan.MaxValue);
+        var result2 = await sut.Read<string>(key);
+        // Assert
+        result1.Should().Be("unitTest");
+        result2.Should().Be("unitTest");
+    }
 
     [Fact]
     public async Task WriteAndReadKey()

@@ -65,5 +65,45 @@ namespace GerwimFeiken.Cache
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         Task Delete<T>(string key);
+
+        /// <summary>
+        /// Reads a value from the cache if it exists, else execute the function, write it to the cache and return
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="func"></param>
+        /// <param name="expireInSeconds"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        Task<T?> ReadOrWrite<T>(string key, Func<T> func, int? expireInSeconds = null);
+        
+        /// <summary>
+        /// Reads a value from the cache if it exists, else execute the function, write it to the cache and return
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="func"></param>
+        /// <param name="expireInSeconds"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        Task<T?> ReadOrWrite<T>(string key, Func<Task<T>> func, int? expireInSeconds = null);
+        
+        /// <summary>
+        /// Reads a value from the cache if it exists, else execute the function, write it to the cache and return
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="func"></param>
+        /// <param name="expireIn"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        Task<T?> ReadOrWrite<T>(string key, Func<T> func, TimeSpan expireIn);
+        
+        /// <summary>
+        /// Reads a value from the cache if it exists, else execute the function, write it to the cache and return
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="func"></param>
+        /// <param name="expireIn"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        Task<T?> ReadOrWrite<T>(string key, Func<Task<T>> func, TimeSpan expireIn);
     }
 }
