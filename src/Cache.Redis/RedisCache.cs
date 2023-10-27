@@ -29,7 +29,7 @@ namespace GerwimFeiken.Cache.Redis
             try
             {
                 var redisDb = _redis.GetDatabase();
-                await redisDb.KeyDeleteAsync(key);
+                await redisDb.KeyDeleteAsync(key).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
@@ -47,12 +47,12 @@ namespace GerwimFeiken.Cache.Redis
 
         protected override async Task<WriteResult> WriteImplementation<T>(string key, T value, int? expireInSeconds)
         {
-            return await RedisWrite(key, value, expireInSeconds, When.Always);
+            return await RedisWrite(key, value, expireInSeconds, When.Always).ConfigureAwait(false);
         }
 
         protected override async Task<WriteResult> WriteImplementation<T>(string key, T value, bool errorIfExists, int? expireInSeconds)
         {
-            return await RedisWrite(key, value, expireInSeconds, errorIfExists ? When.NotExists : When.Always);
+            return await RedisWrite(key, value, expireInSeconds, errorIfExists ? When.NotExists : When.Always).ConfigureAwait(false);
         }
         
         private async Task<WriteResult> RedisWrite<T>(string key, T value, int? expireInSeconds, When when) {
@@ -65,7 +65,7 @@ namespace GerwimFeiken.Cache.Redis
                 });
 
                 var response =
-                    await redisDb.StringSetAsync(key, json, TimeSpan.FromSeconds(expireInSeconds ?? _expirationTtl), when);
+                    await redisDb.StringSetAsync(key, json, TimeSpan.FromSeconds(expireInSeconds ?? _expirationTtl), when).ConfigureAwait(false);
                 if (!response)
                 {
                     if (when is When.NotExists) throw new KeyAlreadyExistsException();
@@ -93,7 +93,7 @@ namespace GerwimFeiken.Cache.Redis
             try
             {
                 var redisDb = _redis.GetDatabase();
-                var response = await redisDb.StringGetAsync(key);
+                var response = await redisDb.StringGetAsync(key).ConfigureAwait(false);
 
                 if (!response.HasValue) return ReadResult<T?>.Fail(default, ReadReason.KeyDoesNotExist);
 

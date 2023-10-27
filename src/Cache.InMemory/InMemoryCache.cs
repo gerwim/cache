@@ -30,7 +30,7 @@ namespace GerwimFeiken.Cache.InMemory
         {
             try
             {
-                await WriteLock.WaitAsync();
+                await WriteLock.WaitAsync().ConfigureAwait(false);
                 LocalCache[key] = ConvertValue(value, expireInSeconds);
             }
             catch
@@ -49,15 +49,15 @@ namespace GerwimFeiken.Cache.InMemory
         {
             if (!errorIfExists)
             {
-                return await WriteImplementation(key, value, expireInSeconds);
+                return await WriteImplementation(key, value, expireInSeconds).ConfigureAwait(false);
             }
 
             try
             {
-                await WriteLock.WaitAsync();
+                await WriteLock.WaitAsync().ConfigureAwait(false);
 
                 // Read key -- to make sure it's deleted if expired
-                _ = await ReadImplementation<T>(key);
+                _ = await ReadImplementation<T>(key).ConfigureAwait(false);
 
                 if (!LocalCache.TryAdd(key, ConvertValue(value, expireInSeconds)))
                 {

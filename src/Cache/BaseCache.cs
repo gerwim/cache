@@ -41,23 +41,23 @@ namespace GerwimFeiken.Cache
 
         public async Task<T?> ReadOrWrite<T>(string key, Func<T> func, int? expireInSeconds = null)
         {
-            var existingValue = await Read<T>(key);
+            var existingValue = await Read<T>(key).ConfigureAwait(false);
             if (existingValue is not null) return existingValue;
             
             var result = func();
             
-            if (result is not null) await Write(key, result, expireInSeconds);
+            if (result is not null) await Write(key, result, expireInSeconds).ConfigureAwait(false);
             return result;
         }
 
         public async Task<T?> ReadOrWrite<T>(string key, Func<Task<T>> func, int? expireInSeconds = null)
         {
-            var existingValue = await Read<T>(key);
+            var existingValue = await Read<T>(key).ConfigureAwait(false);
             if (existingValue is not null) return existingValue;
 
-            var result = await func();
+            var result = await func().ConfigureAwait(false);
 
-            if (result is not null) await Write(key, result, expireInSeconds);
+            if (result is not null) await Write(key, result, expireInSeconds).ConfigureAwait(false);
             return result;
         }
         
@@ -66,7 +66,7 @@ namespace GerwimFeiken.Cache
             var seconds = expireIn.TotalSeconds;
             if (seconds > Int32.MaxValue) seconds = Int32.MaxValue;
             
-            return await ReadOrWrite(key, func, (int) seconds);
+            return await ReadOrWrite(key, func, (int) seconds).ConfigureAwait(false);
         }
         
         public async Task<T?> ReadOrWrite<T>(string key, Func<Task<T>> func, TimeSpan expireIn)
@@ -74,7 +74,7 @@ namespace GerwimFeiken.Cache
             var seconds = expireIn.TotalSeconds;
             if (seconds > Int32.MaxValue) seconds = Int32.MaxValue;
             
-            return await ReadOrWrite(key, func, (int) seconds);
+            return await ReadOrWrite(key, func, (int) seconds).ConfigureAwait(false);
         }
 
         public async Task<T?> Read<T>(string key)
@@ -82,7 +82,7 @@ namespace GerwimFeiken.Cache
             // Convert the key
             string encodedKey = $"{typeof(T)}-{key}".ComputeSha256Hash();
 
-            return (await ReadImplementation<T?>(encodedKey)).Value;
+            return (await ReadImplementation<T?>(encodedKey).ConfigureAwait(false)).Value;
         }
         
         public Task Delete<T>(string key)

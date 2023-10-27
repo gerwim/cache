@@ -26,7 +26,7 @@ public class CloudflareApi
         };
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiToken);
 
-        return await HttpClient.SendAsync(request);
+        return await HttpClient.SendAsync(request).ConfigureAwait(false);
     }
     
     public async Task<HttpResponseMessage> DeleteKey(string keyId)
@@ -38,7 +38,7 @@ public class CloudflareApi
         };
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiToken);
 
-        return await HttpClient.SendAsync(request);
+        return await HttpClient.SendAsync(request).ConfigureAwait(false);
     }
     
     public async Task<HttpResponseMessage> WriteKey(string keyId, int expirationTtl, string content)
@@ -52,6 +52,6 @@ public class CloudflareApi
 
         request.Content = new StringContent(content);
 
-        return await HttpClient.SendAsync(request);
+        return await HttpClient.SendAsync(request).ConfigureAwait(false);
     }
 }
