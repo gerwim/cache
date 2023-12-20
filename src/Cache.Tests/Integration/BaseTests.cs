@@ -219,4 +219,20 @@ public abstract class BaseTests<T> where T : BaseCache
         // Assert
         await act.Should().NotThrowAsync<KeyAlreadyExistsException>().ConfigureAwait(false);
     }
+
+    [Fact]
+    public async Task CanListKeys()
+    {
+        // Arrange
+        var sut = (T) Activator.CreateInstance(typeof(T), _options)!;
+        await sut.Write("key1", "value").ConfigureAwait(false);
+        await sut.Write("key2", "value").ConfigureAwait(false);
+        await sut.Write("key3", "value").ConfigureAwait(false);
+        
+        // Act
+        var result = await sut.ListKeys("key").ConfigureAwait(false);
+        
+        // Assert
+        result.Should().HaveCount(3);
+    }
 }

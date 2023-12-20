@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using GerwimFeiken.Cache.Exceptions;
@@ -24,6 +25,11 @@ namespace GerwimFeiken.Cache.InMemory
         {
             LocalCache.TryRemove(key, out _);
             return Task.CompletedTask;
+        }
+
+        protected override Task<IEnumerable<string>> ListKeysImplementation(string prefix)
+        {
+            throw new NotImplementedException();
         }
 
         protected override async Task<WriteResult> WriteImplementation<T>(string key, T value, int? expireInSeconds)

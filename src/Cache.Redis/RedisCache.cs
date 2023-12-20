@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using GerwimFeiken.Cache.Exceptions;
 using GerwimFeiken.Cache.Models;
@@ -43,6 +45,16 @@ namespace GerwimFeiken.Cache.Redis
 
                 throw;
             }
+        }
+
+        protected override Task<IEnumerable<string>> ListKeysImplementation(string prefix)
+        {
+            var endpoints = _redis.GetEndPoints();
+            var server = _redis.GetServer(endpoints[0]);
+
+            var keys = server.Keys(pattern: $"{prefix}*").ToList();
+
+            return Task.FromResult(keys.Select(x => x.ToString()));
         }
 
         protected override async Task<WriteResult> WriteImplementation<T>(string key, T value, int? expireInSeconds)

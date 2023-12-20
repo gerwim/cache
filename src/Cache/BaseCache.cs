@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using GerwimFeiken.Cache.Models;
 using GerwimFeiken.Cache.Utils.Extensions;
@@ -77,6 +78,11 @@ namespace GerwimFeiken.Cache
             return await ReadOrWrite(key, func, (int) seconds).ConfigureAwait(false);
         }
 
+        public Task<IEnumerable<string>> ListKeys(string prefix)
+        {
+            return ListKeysImplementation(prefix);
+        }
+
         public async Task<T?> Read<T>(string key)
         {
             // Convert the key
@@ -94,6 +100,7 @@ namespace GerwimFeiken.Cache
         }
 
         protected abstract Task DeleteImplementation(string key);
+        protected abstract Task<IEnumerable<string>> ListKeysImplementation(string prefix);
         protected abstract Task<ReadResult<T?>> ReadImplementation<T>(string key);
         protected abstract Task<WriteResult> WriteImplementation<T>(string key, T value, int? expireInSeconds);
         protected abstract Task<WriteResult> WriteImplementation<T>(string key, T value, bool errorIfExists, int? expireInSeconds);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using GerwimFeiken.Cache.Cloudflare.Options;
@@ -38,6 +39,11 @@ namespace GerwimFeiken.Cache.Cloudflare
             {
                 throw new DeleteException($"Could not delete from Cloudflare: {await response.Content.ReadAsStringAsync().ConfigureAwait(false)}");
             }
+        }
+
+        protected override Task<IEnumerable<string>> ListKeysImplementation(string prefix)
+        {
+            throw new NotImplementedException();
         }
 
         protected override async Task<WriteResult> WriteImplementation<T>(string key, T value, int? expireInSeconds)
