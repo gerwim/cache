@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.1</TargetFramework>
+        <TargetFramework>netstandard2.0</TargetFramework>
         <AssemblyName>GerwimFeiken.Cache.Redis</AssemblyName>
         <RootNamespace>GerwimFeiken.Cache.Redis</RootNamespace>
         <Nullable>enable</Nullable>

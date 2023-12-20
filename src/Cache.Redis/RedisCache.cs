@@ -19,7 +19,7 @@ namespace GerwimFeiken.Cache.Redis
         {
             if (options is null) throw new ArgumentNullException(nameof(options));
 
-            _redis = ConnectionMultiplexer.Connect(options.GetRequiredValue(x => x.Configuration));
+            _redis = ConnectionMultiplexer.Connect(options.GetRequiredValue(x => x.Configuration)!);
             _expirationTtl = options.GetRequiredValue(x => x.DefaultExpirationTtl);
             _ignoreTimeouts = options.GetRequiredValue(x => x.IgnoreTimeouts);
         }

@@ -23,7 +23,7 @@ namespace GerwimFeiken.Cache.Cloudflare
             var namespaceId = options.GetRequiredValue(x => x.NamespaceId);
             
             var apiUrl = $"https://api.cloudflare.com/client/v4/accounts/{accountId}/storage/kv/namespaces/{namespaceId}";
-            var apiToken = options.GetRequiredValue(x => x.ApiToken);
+            var apiToken = options.GetRequiredValue(x => x.ApiToken)!;
 
             _cloudflareApi = new CloudflareApi(apiUrl, apiToken);
 
