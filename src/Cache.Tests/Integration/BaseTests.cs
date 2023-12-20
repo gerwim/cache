@@ -47,7 +47,7 @@ public abstract class BaseTests<T> where T : BaseCache
         var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
         var key = nameof(ReadOrWrite_ASync);
         // Act
-        var result1 = await sut.ReadOrWrite<string>(key, async () => await Task.FromResult("unitTest").ConfigureAwait(false)).ConfigureAwait(false);
+        var result1 = await sut.ReadOrWrite(key, async () => await Task.FromResult("unitTest").ConfigureAwait(false)).ConfigureAwait(false);
         var result2 = await sut.Read<string>(key).ConfigureAwait(false);
         // Assert
         result1.Should().Be("unitTest");
@@ -75,7 +75,7 @@ public abstract class BaseTests<T> where T : BaseCache
         var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
         var key = nameof(ReadOrWrite_TimeSpan_ASync);
         // Act
-        var result1 = await sut.ReadOrWrite<string>(nameof(ReadOrWrite_TimeSpan_ASync), async () => await Task.FromResult("unitTest").ConfigureAwait(false), TimeSpan.MaxValue).ConfigureAwait(false);
+        var result1 = await sut.ReadOrWrite(nameof(ReadOrWrite_TimeSpan_ASync), async () => await Task.FromResult("unitTest").ConfigureAwait(false), TimeSpan.MaxValue).ConfigureAwait(false);
         var result2 = await sut.Read<string>(key).ConfigureAwait(false);
         // Assert
         result1.Should().Be("unitTest");
