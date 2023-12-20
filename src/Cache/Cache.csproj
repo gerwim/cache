@@ -3,7 +3,6 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <Nullable>enable</Nullable>
-        <LangVersion>10</LangVersion>
         <PackageId>GerwimFeiken.Cache</PackageId>
         <Version>1.4.0</Version>
         <PackageTags>Cache;Key value;keyvalue</PackageTags>

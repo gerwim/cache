@@ -5,8 +5,6 @@
         <AssemblyName>GerwimFeiken.Cache.InMemory</AssemblyName>
         <RootNamespace>GerwimFeiken.Cache.InMemory</RootNamespace>
         <Nullable>enable</Nullable>
-        <LangVersion>10</LangVersion>
-
         <PackageId>GerwimFeiken.Cache.InMemory</PackageId>
         <Version>1.3.0</Version>
         <PackageTags>Cache;Key value;keyvalue;</PackageTags>
