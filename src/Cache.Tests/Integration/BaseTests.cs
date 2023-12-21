@@ -155,6 +155,19 @@ public abstract class BaseTests<T> where T : BaseCache
         key1.Should().Be("unitTest");
         key2.Should().BeNull();
     }
+    
+    [Fact]
+    public async Task WriteAndReadKey_DifferentType()
+    {
+        // Arrange 
+        var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
+        await sut.Write<string>(nameof(WriteAndReadKey_DifferentType), "unitTest", 60).ConfigureAwait(false);
+        
+        // Act
+        var result = await sut.Read<bool?>(nameof(WriteAndReadKey_DifferentType)).ConfigureAwait(false);
+
+        result.Should().BeNull();
+    }
 
     [Fact]
     public async Task WriteAndDeleteAndReadKey()

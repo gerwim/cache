@@ -78,7 +78,14 @@ namespace GerwimFeiken.Cache
 
         public async Task<T?> Read<T>(string key)
         {
-            return (await ReadImplementation<T?>(key).ConfigureAwait(false)).Value;
+            try
+            {
+                return (await ReadImplementation<T?>(key).ConfigureAwait(false)).Value;
+            }
+            catch
+            {
+                return default;
+            }
         }
 
         public Task<dynamic?> Read(string key)
