@@ -10,10 +10,7 @@ namespace GerwimFeiken.Cache
     {
         public Task Write<T>(string key, T value, int? expireInSeconds = null)
         {
-            // Convert the key
-            string encodedKey = $"{typeof(T)}-{key}".ComputeSha256Hash();
-            
-            return WriteImplementation(encodedKey, value, expireInSeconds);
+            return WriteImplementation(key, value, expireInSeconds);
         }
         
         public Task Write<T>(string key, T value, TimeSpan expireIn)
@@ -26,10 +23,7 @@ namespace GerwimFeiken.Cache
 
         public Task Write<T>(string key, T value, bool errorIfExists, int? expireInSeconds = null)
         {
-            // Convert the key
-            string encodedKey = $"{typeof(T)}-{key}".ComputeSha256Hash();
-            
-            return WriteImplementation(encodedKey, value, errorIfExists, expireInSeconds);
+            return WriteImplementation(key, value, errorIfExists, expireInSeconds);
         }
         
         public Task Write<T>(string key, T value, bool errorIfExists, TimeSpan expireIn)
@@ -85,18 +79,12 @@ namespace GerwimFeiken.Cache
 
         public async Task<T?> Read<T>(string key)
         {
-            // Convert the key
-            string encodedKey = $"{typeof(T)}-{key}".ComputeSha256Hash();
-
-            return (await ReadImplementation<T?>(encodedKey).ConfigureAwait(false)).Value;
+            return (await ReadImplementation<T?>(key).ConfigureAwait(false)).Value;
         }
         
         public Task Delete<T>(string key)
         {
-            // Convert the key
-            string encodedKey = $"{typeof(T)}-{key}".ComputeSha256Hash();
-            
-            return DeleteImplementation(encodedKey);
+            return DeleteImplementation(key);
         }
 
         protected abstract Task DeleteImplementation(string key);
