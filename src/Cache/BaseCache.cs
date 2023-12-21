@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using GerwimFeiken.Cache.Models;
-using GerwimFeiken.Cache.Utils.Extensions;
 
 namespace GerwimFeiken.Cache
 {
@@ -82,6 +81,7 @@ namespace GerwimFeiken.Cache
             return (await ReadImplementation<T?>(key).ConfigureAwait(false)).Value;
         }
         
+        [Obsolete]
         public Task Delete<T>(string key)
         {
             return DeleteImplementation(key);
