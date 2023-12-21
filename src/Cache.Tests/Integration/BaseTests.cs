@@ -176,7 +176,7 @@ public abstract class BaseTests<T> where T : BaseCache
         var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
         // Act
         await sut.Write<string>("writeAndDelete", "unitTest").ConfigureAwait(false);
-        await sut.Delete<string>("writeAndDelete").ConfigureAwait(false);
+        await sut.Delete("writeAndDelete").ConfigureAwait(false);
         var key = await sut.Read<string>("writeAndDelete").ConfigureAwait(false);
         // Assert
         key.Should().BeNull();

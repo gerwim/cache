@@ -72,7 +72,15 @@ namespace GerwimFeiken.Cache
         /// <param name="key"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
+        [Obsolete("Please use the non generic Delete method instead.")]
         Task Delete<T>(string key);
+        
+        /// <summary>
+        /// Deletes an object from the cache
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        Task Delete(string key);
 
         /// <summary>
         /// Reads a value from the cache if it exists, else execute the function, write it to the cache and return

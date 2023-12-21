@@ -92,9 +92,14 @@ namespace GerwimFeiken.Cache
         {
             return Read<dynamic?>(key);
         }
-		
+        
 		[Obsolete("Please use the non generic method")]
         public Task Delete<T>(string key)
+        {
+            return Delete(key);
+        }
+        
+        public Task Delete(string key)
         {
             return DeleteImplementation(key);
         }
