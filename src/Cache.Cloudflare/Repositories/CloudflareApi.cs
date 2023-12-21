@@ -28,11 +28,11 @@ public class CloudflareApi
         return await HttpClient.SendAsync(request).ConfigureAwait(false);
     }
     
-    public async Task<HttpResponseMessage> ListKeys(string prefix)
+    public async Task<HttpResponseMessage> ListKeys(string? prefix)
     {
         var request = new HttpRequestMessage
         {
-            RequestUri = new Uri($"{_apiUrl}/keys?prefix={prefix}"),
+            RequestUri = new Uri($"{_apiUrl}/keys{(!string.IsNullOrEmpty(prefix) ? $"?prefix={prefix}" : null)}"),
             Method = HttpMethod.Get,
         };
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiToken);

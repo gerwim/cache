@@ -28,10 +28,10 @@ namespace GerwimFeiken.Cache.InMemory
             return Task.CompletedTask;
         }
 
-        protected override async Task<IEnumerable<string>> ListKeysImplementation(string prefix)
+        protected override async Task<IEnumerable<string>> ListKeysImplementation(string? prefix)
         {
             var keys = new List<string>();
-            foreach (var s in LocalCache.Keys.Where(x => x.StartsWith(prefix)))
+            foreach (var s in LocalCache.Keys.Where(x => string.IsNullOrWhiteSpace(prefix) || x.StartsWith(prefix)))
             {
                 var result = await ReadImplementation<dynamic?>(s).ConfigureAwait(false);
                 if (result.OperationStatus is Status.Ok) keys.Add(s);

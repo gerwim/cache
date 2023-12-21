@@ -123,10 +123,10 @@ namespace GerwimFeiken.Cache
         Task<T?> ReadOrWrite<T>(string key, Func<Task<T>> func, TimeSpan expireIn);
 
         /// <summary>
-        /// Returns a list of all keys starting with the prefix
+        /// Returns a list of all keys and optionally starting with the prefix
         /// </summary>
         /// <param name="prefix"></param>
         /// <returns>An array of keys</returns>
-        Task<IEnumerable<string>> ListKeys(string prefix);
+        Task<IEnumerable<string>> ListKeys(string? prefix = null);
     }
 }

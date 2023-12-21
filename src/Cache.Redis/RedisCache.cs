@@ -47,7 +47,7 @@ namespace GerwimFeiken.Cache.Redis
             }
         }
 
-        protected override Task<IEnumerable<string>> ListKeysImplementation(string prefix)
+        protected override Task<IEnumerable<string>> ListKeysImplementation(string? prefix)
         {
             var endpoints = _redis.GetEndPoints();
             var server = _redis.GetServer(endpoints[0]);

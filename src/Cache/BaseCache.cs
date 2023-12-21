@@ -71,7 +71,7 @@ namespace GerwimFeiken.Cache
             return await ReadOrWrite(key, func, (int) seconds).ConfigureAwait(false);
         }
 
-        public Task<IEnumerable<string>> ListKeys(string prefix)
+        public Task<IEnumerable<string>> ListKeys(string? prefix = null)
         {
             return ListKeysImplementation(prefix);
         }
@@ -105,7 +105,7 @@ namespace GerwimFeiken.Cache
         }
 
         protected abstract Task DeleteImplementation(string key);
-        protected abstract Task<IEnumerable<string>> ListKeysImplementation(string prefix);
+        protected abstract Task<IEnumerable<string>> ListKeysImplementation(string? prefix);
         protected abstract Task<ReadResult<T?>> ReadImplementation<T>(string key);
         protected abstract Task<WriteResult> WriteImplementation<T>(string key, T value, int? expireInSeconds);
         protected abstract Task<WriteResult> WriteImplementation<T>(string key, T value, bool errorIfExists, int? expireInSeconds);

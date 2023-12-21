@@ -43,7 +43,7 @@ namespace GerwimFeiken.Cache.Cloudflare
             }
         }
 
-        protected override async Task<IEnumerable<string>> ListKeysImplementation(string prefix)
+        protected override async Task<IEnumerable<string>> ListKeysImplementation(string? prefix)
         {
             var response = await _cloudflareApi.ListKeys(prefix).ConfigureAwait(false);
 
