@@ -80,8 +80,13 @@ namespace GerwimFeiken.Cache
         {
             return (await ReadImplementation<T?>(key).ConfigureAwait(false)).Value;
         }
-        
-        [Obsolete]
+
+        public Task<dynamic?> Read(string key)
+        {
+            return Read<dynamic?>(key);
+        }
+		
+		[Obsolete("Please use the non generic method")]
         public Task Delete<T>(string key)
         {
             return DeleteImplementation(key);

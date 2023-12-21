@@ -125,6 +125,21 @@ public abstract class BaseTests<T> where T : BaseCache
         // Assert
         key.Should().Be(value);
     }
+    
+    [Fact]
+    public async Task WriteAndReadKey_Dynamic()
+    {
+        // Arrange
+        var key = nameof(WriteAndReadKey_Dynamic);
+        var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
+        
+        // Act
+        await sut.Write($"{key}", "someValue").ConfigureAwait(false);
+        var result = await sut.Read($"{key}").ConfigureAwait(false);
+        
+        // Assert
+        Assert.Equal("someValue", result);
+    }
 
     [Fact]
     public async Task WriteAndReadKey_Expired()
