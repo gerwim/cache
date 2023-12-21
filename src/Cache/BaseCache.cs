@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using GerwimFeiken.Cache.Exceptions;
 using GerwimFeiken.Cache.Models;
 
 namespace GerwimFeiken.Cache
@@ -82,9 +83,14 @@ namespace GerwimFeiken.Cache
             {
                 return (await ReadImplementation<T?>(key).ConfigureAwait(false)).Value;
             }
-            catch
+            catch (Exception ex)
             {
-                return default;
+                if (ex.Message.Contains("Could not convert"))
+                {
+                    throw new InvalidTypeException($"The value of key being queried is not of type {typeof(T)}");
+                }
+
+                throw;
             }
         }
 

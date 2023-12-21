@@ -57,6 +57,7 @@ namespace GerwimFeiken.Cache
         /// <param name="key"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
+        /// <exception cref="InvalidTypeException">Will be thrown if the type does not match</exception>
         Task<T?> Read<T>(string key);
         
         /// <summary>
@@ -90,6 +91,7 @@ namespace GerwimFeiken.Cache
         /// <param name="expireInSeconds"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
+        /// <exception cref="InvalidTypeException">Will be thrown if the type does not match</exception>
         Task<T?> ReadOrWrite<T>(string key, Func<T> func, int? expireInSeconds = null);
         
         /// <summary>
@@ -100,6 +102,7 @@ namespace GerwimFeiken.Cache
         /// <param name="expireInSeconds"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
+        /// <exception cref="InvalidTypeException">Will be thrown if the type does not match</exception>
         Task<T?> ReadOrWrite<T>(string key, Func<Task<T>> func, int? expireInSeconds = null);
         
         /// <summary>
@@ -110,6 +113,7 @@ namespace GerwimFeiken.Cache
         /// <param name="expireIn"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
+        /// <exception cref="InvalidTypeException">Will be thrown if the type does not match</exception>
         Task<T?> ReadOrWrite<T>(string key, Func<T> func, TimeSpan expireIn);
         
         /// <summary>
@@ -120,6 +124,7 @@ namespace GerwimFeiken.Cache
         /// <param name="expireIn"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
+        /// <exception cref="InvalidTypeException">Will be thrown if the type does not match</exception>
         Task<T?> ReadOrWrite<T>(string key, Func<Task<T>> func, TimeSpan expireIn);
 
         /// <summary>

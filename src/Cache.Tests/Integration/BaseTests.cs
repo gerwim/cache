@@ -164,9 +164,10 @@ public abstract class BaseTests<T> where T : BaseCache
         await sut.Write<string>(nameof(WriteAndReadKey_DifferentType), "unitTest", 60).ConfigureAwait(false);
         
         // Act
-        var result = await sut.Read<bool?>(nameof(WriteAndReadKey_DifferentType)).ConfigureAwait(false);
+        var act = async () => await sut.Read<bool?>(nameof(WriteAndReadKey_DifferentType)).ConfigureAwait(false);
 
-        result.Should().BeNull();
+        // Assert
+        await act.Should().ThrowAsync<InvalidTypeException>().ConfigureAwait(false);
     }
 
     [Fact]
