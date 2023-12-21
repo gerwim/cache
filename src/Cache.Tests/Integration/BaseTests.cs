@@ -250,10 +250,10 @@ public abstract class BaseTests<T> where T : BaseCache
     }
 
     [Fact]
-    public async Task ListKeysReturnsCorrectCount()
+    public async Task ListKeys_ReturnsCorrectCount_WithExpired()
     {
         // Arrange
-        var key = $"{nameof(ListKeysReturnsCorrectCount)}";
+        var key = $"{nameof(ListKeys_ReturnsCorrectCount_WithExpired)}";
         var sut = (T) Activator.CreateInstance(typeof(T), _options)!;
         await sut.Write($"{key}1", "value").ConfigureAwait(false);
         await sut.Write($"{key}2", "value").ConfigureAwait(false);
@@ -267,5 +267,21 @@ public abstract class BaseTests<T> where T : BaseCache
         
         // Assert
         result.Should().HaveCount(3);
+    }
+    
+    [Fact]
+    public async Task ListKeys_ReturnsCorrectCount()
+    {
+        // Arrange
+        var key = $"{nameof(ListKeys_ReturnsCorrectCount)}";
+        var sut = (T) Activator.CreateInstance(typeof(T), _options)!;
+        await sut.Write($"{key}1", "value").ConfigureAwait(false);
+        await sut.Write($"{key}2", "value").ConfigureAwait(false);
+        
+        // Act
+        var result = await sut.ListKeys().ConfigureAwait(false);
+        
+        // Assert
+        result.Should().HaveCountGreaterOrEqualTo(2); // since the storage is shared between all tests, there could be more than 2 entries
     }
 }
