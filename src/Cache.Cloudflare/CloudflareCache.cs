@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using GerwimFeiken.Cache.Cloudflare.Models;
 using GerwimFeiken.Cache.Cloudflare.Options;
 using GerwimFeiken.Cache.Cloudflare.Repositories;
 using GerwimFeiken.Cache.Exceptions;
@@ -41,9 +43,17 @@ namespace GerwimFeiken.Cache.Cloudflare
             }
         }
 
-        protected override Task<IEnumerable<string>> ListKeysImplementation(string prefix)
+        protected override async Task<IEnumerable<string>> ListKeysImplementation(string prefix)
         {
-            throw new NotImplementedException();
+            var response = await _cloudflareApi.ListKeys(prefix).ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new DeleteException($"Could not list keys from Cloudflare: {await response.Content.ReadAsStringAsync().ConfigureAwait(false)}");
+            }
+            
+            var obj = JsonConvert.DeserializeObject<CloudflareListKeysResponse>(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
+            return obj?.Result?.Select(x => x.Name) ?? Array.Empty<string>();
         }
 
         protected override async Task<WriteResult> WriteImplementation<T>(string key, T value, int? expireInSeconds)

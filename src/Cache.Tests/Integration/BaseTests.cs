@@ -252,13 +252,17 @@ public abstract class BaseTests<T> where T : BaseCache
     public async Task ListKeysReturnsCorrectCount()
     {
         // Arrange
+        var key = $"{nameof(ListKeysReturnsCorrectCount)}";
         var sut = (T) Activator.CreateInstance(typeof(T), _options)!;
-        await sut.Write("key1", "value").ConfigureAwait(false);
-        await sut.Write("key2", "value").ConfigureAwait(false);
-        await sut.Write("key3", "value").ConfigureAwait(false);
+        await sut.Write($"{key}1", "value").ConfigureAwait(false);
+        await sut.Write($"{key}2", "value").ConfigureAwait(false);
+        await sut.Write($"{key}3", "value").ConfigureAwait(false);
+        await sut.Write($"{key}4", "value", 61).ConfigureAwait(false);
+
+        await Task.Delay(62000).ConfigureAwait(false);
         
         // Act
-        var result = await sut.ListKeys("key").ConfigureAwait(false);
+        var result = await sut.ListKeys(key).ConfigureAwait(false);
         
         // Assert
         result.Should().HaveCount(3);

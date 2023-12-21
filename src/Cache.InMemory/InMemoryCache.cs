@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GerwimFeiken.Cache.Exceptions;
@@ -27,9 +28,16 @@ namespace GerwimFeiken.Cache.InMemory
             return Task.CompletedTask;
         }
 
-        protected override Task<IEnumerable<string>> ListKeysImplementation(string prefix)
+        protected override async Task<IEnumerable<string>> ListKeysImplementation(string prefix)
         {
-            throw new NotImplementedException();
+            var keys = new List<string>();
+            foreach (var s in LocalCache.Keys.Where(x => x.StartsWith(prefix)))
+            {
+                var result = await ReadImplementation<dynamic?>(s).ConfigureAwait(false);
+                if (result.OperationStatus is Status.Ok) keys.Add(s);
+            }
+            
+            return keys;
         }
 
         protected override async Task<WriteResult> WriteImplementation<T>(string key, T value, int? expireInSeconds)

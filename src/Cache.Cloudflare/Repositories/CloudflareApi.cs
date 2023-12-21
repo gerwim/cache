@@ -28,6 +28,18 @@ public class CloudflareApi
         return await HttpClient.SendAsync(request).ConfigureAwait(false);
     }
     
+    public async Task<HttpResponseMessage> ListKeys(string prefix)
+    {
+        var request = new HttpRequestMessage
+        {
+            RequestUri = new Uri($"{_apiUrl}/keys?prefix={prefix}"),
+            Method = HttpMethod.Get,
+        };
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiToken);
+
+        return await HttpClient.SendAsync(request).ConfigureAwait(false);
+    }
+    
     public async Task<HttpResponseMessage> DeleteKey(string keyId)
     {
         var request = new HttpRequestMessage
