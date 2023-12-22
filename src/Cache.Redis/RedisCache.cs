@@ -28,10 +28,15 @@ namespace GerwimFeiken.Cache.Redis
         
         protected override async Task DeleteImplementation(string key)
         {
+            await DeleteImplementation([key]).ConfigureAwait(false);
+        }
+
+        protected override async Task DeleteImplementation(IEnumerable<string> keys)
+        {
             try
             {
                 var redisDb = _redis.GetDatabase();
-                await redisDb.KeyDeleteAsync(key).ConfigureAwait(false);
+                await redisDb.KeyDeleteAsync(keys.Select(x => new RedisKey(x)).ToArray()).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {

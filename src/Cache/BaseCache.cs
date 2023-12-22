@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using GerwimFeiken.Cache.Exceptions;
@@ -109,8 +110,14 @@ namespace GerwimFeiken.Cache
         {
             return DeleteImplementation(key);
         }
+        
+        public Task Delete(IEnumerable<string> keys)
+        {
+            return DeleteImplementation(keys);
+        }
 
         protected abstract Task DeleteImplementation(string key);
+        protected abstract Task DeleteImplementation(IEnumerable<string> keys);
         protected abstract Task<IEnumerable<string>> ListKeysImplementation(string? prefix);
         protected abstract Task<ReadResult<T?>> ReadImplementation<T>(string key);
         protected abstract Task<WriteResult> WriteImplementation<T>(string key, T value, int? expireInSeconds);

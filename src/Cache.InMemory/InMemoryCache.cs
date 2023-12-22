@@ -28,6 +28,16 @@ namespace GerwimFeiken.Cache.InMemory
             return Task.CompletedTask;
         }
 
+        protected override Task DeleteImplementation(IEnumerable<string> keys)
+        {
+            foreach (var key in keys)
+            {
+                DeleteImplementation(key);
+            }
+
+            return Task.CompletedTask;
+        }
+
         protected override async Task<IEnumerable<string>> ListKeysImplementation(string? prefix)
         {
             var keys = new List<string>();

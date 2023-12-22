@@ -14,6 +14,23 @@ public abstract class BaseTests<T> where T : BaseCache
     {
         _options = options;
     }
+    
+    [Fact]
+    public async Task DeleteMultipleKeys()
+    {
+        // Arrange 
+        var key = nameof(DeleteMultipleKeys);
+        var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
+        await sut.Write<string>($"{key}1", "unitTest").ConfigureAwait(false);
+        await sut.Write<string>($"{key}2", "unitTest").ConfigureAwait(false);
+        await sut.Write<string>($"{key}3", "unitTest").ConfigureAwait(false);
+
+        // Act
+        var act = async () => await sut.Delete([$"{key}1", $"{key}2", $"{key}3"]).ConfigureAwait(false);
+        
+        // Assert
+        await act.Should().NotThrowAsync().ConfigureAwait(false);
+    }
 
     [Fact]
     public async Task ReadKeyShouldReturnNull()

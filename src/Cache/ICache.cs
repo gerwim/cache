@@ -82,6 +82,13 @@ namespace GerwimFeiken.Cache
         /// <param name="key"></param>
         /// <returns></returns>
         Task Delete(string key);
+        
+        /// <summary>
+        /// Deletes multiple objects from the cache
+        /// </summary>
+        /// <param name="keys"></param>
+        /// <returns></returns>
+        Task Delete(IEnumerable<string> keys);
 
         /// <summary>
         /// Reads a value from the cache if it exists, else execute the function, write it to the cache and return
