@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using GerwimFeiken.Cache.Exceptions;
 using GerwimFeiken.Cache.Models;
@@ -26,10 +28,15 @@ namespace GerwimFeiken.Cache.Redis
         
         protected override async Task DeleteImplementation(string key)
         {
+            await DeleteImplementation([key]).ConfigureAwait(false);
+        }
+
+        protected override async Task DeleteImplementation(IEnumerable<string> keys)
+        {
             try
             {
                 var redisDb = _redis.GetDatabase();
-                await redisDb.KeyDeleteAsync(key).ConfigureAwait(false);
+                await redisDb.KeyDeleteAsync(keys.Select(x => new RedisKey(x)).ToArray()).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
@@ -43,6 +50,16 @@ namespace GerwimFeiken.Cache.Redis
 
                 throw;
             }
+        }
+
+        protected override Task<IEnumerable<string>> ListKeysImplementation(string? prefix)
+        {
+            var endpoints = _redis.GetEndPoints();
+            var server = _redis.GetServer(endpoints[0]);
+
+            var keys = server.Keys(pattern: $"{prefix}*").ToList();
+
+            return Task.FromResult(keys.Select(x => x.ToString()));
         }
 
         protected override async Task<WriteResult> WriteImplementation<T>(string key, T value, int? expireInSeconds)

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GerwimFeiken.Cache.Exceptions;
@@ -24,6 +26,28 @@ namespace GerwimFeiken.Cache.InMemory
         {
             LocalCache.TryRemove(key, out _);
             return Task.CompletedTask;
+        }
+
+        protected override Task DeleteImplementation(IEnumerable<string> keys)
+        {
+            foreach (var key in keys)
+            {
+                DeleteImplementation(key);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        protected override async Task<IEnumerable<string>> ListKeysImplementation(string? prefix)
+        {
+            var keys = new List<string>();
+            foreach (var s in LocalCache.Keys.Where(x => string.IsNullOrWhiteSpace(prefix) || x.StartsWith(prefix)))
+            {
+                var result = await ReadImplementation<dynamic?>(s).ConfigureAwait(false);
+                if (result.OperationStatus is Status.Ok) keys.Add(s);
+            }
+            
+            return keys;
         }
 
         protected override async Task<WriteResult> WriteImplementation<T>(string key, T value, int? expireInSeconds)

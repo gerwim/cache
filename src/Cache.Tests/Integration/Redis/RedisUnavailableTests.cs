@@ -31,7 +31,7 @@ public class RedisUnavailableTests
         // Arrange 
         var sut = (RedisCache)Activator.CreateInstance(typeof(RedisCache), _optionsWithIgnore)!;
         // Act
-        var key = await sut.Read<string>("test");
+        var key = await sut.Read<string>("test").ConfigureAwait(false);
         // Assert
         key.Should().BeNull();
     }
@@ -42,9 +42,9 @@ public class RedisUnavailableTests
         // Arrange 
         var sut = (RedisCache)Activator.CreateInstance(typeof(RedisCache), _options)!;
         // Act
-        var act = async () => await sut.Read<string>("test");
+        var act = async () => await sut.Read<string>("test").ConfigureAwait(false);
         // Assert
-        await act.Should().ThrowAsync<RedisConnectionException>();
+        await act.Should().ThrowAsync<RedisConnectionException>().ConfigureAwait(false);
     }
 
     [Fact]
@@ -53,9 +53,9 @@ public class RedisUnavailableTests
         // Arrange 
         var sut = (RedisCache)Activator.CreateInstance(typeof(RedisCache), _options)!;
         // Act
-        var act = async () => await sut.Write<string>("test", "value");
+        var act = async () => await sut.Write<string>("test", "value").ConfigureAwait(false);
         // Assert
-        await act.Should().ThrowAsync<RedisConnectionException>();
+        await act.Should().ThrowAsync<RedisConnectionException>().ConfigureAwait(false);
     }
 
     [Fact]
@@ -64,9 +64,9 @@ public class RedisUnavailableTests
         // Arrange 
         var sut = (RedisCache)Activator.CreateInstance(typeof(RedisCache), _options)!;
         // Act
-        var act = async () => await sut.Delete<string>("test");
+        var act = async () => await sut.Delete<string>("test").ConfigureAwait(false);
         // Assert
-        await act.Should().ThrowAsync<RedisConnectionException>();
+        await act.Should().ThrowAsync<RedisConnectionException>().ConfigureAwait(false);
     }
 
     [Fact]
@@ -75,8 +75,8 @@ public class RedisUnavailableTests
         // Arrange 
         var sut = (RedisCache)Activator.CreateInstance(typeof(RedisCache), _optionsWithIgnore)!;
         // Act
-        await sut.Write<string>("writeAndRead", "unitTest");
-        var key = await sut.Read<string>("writeAndRead");
+        await sut.Write<string>("writeAndRead", "unitTest").ConfigureAwait(false);
+        var key = await sut.Read<string>("writeAndRead").ConfigureAwait(false);
         // Assert
         key.Should().BeNull();
     }
@@ -87,9 +87,9 @@ public class RedisUnavailableTests
         // Arrange 
         var sut = (RedisCache)Activator.CreateInstance(typeof(RedisCache), _optionsWithIgnore)!;
         // Act
-        await sut.Write<string>("writeAndRead", "unitTest", 60);
-        var key1 = await sut.Read<string>("writeAndRead");
-        var key2 = await sut.Read<string>("writeAndRead");
+        await sut.Write<string>("writeAndRead", "unitTest", 60).ConfigureAwait(false);
+        var key1 = await sut.Read<string>("writeAndRead").ConfigureAwait(false);
+        var key2 = await sut.Read<string>("writeAndRead").ConfigureAwait(false);
         // Assert
         key1.Should().BeNull();
         key2.Should().BeNull();
@@ -101,9 +101,9 @@ public class RedisUnavailableTests
         // Arrange 
         var sut = (RedisCache)Activator.CreateInstance(typeof(RedisCache), _optionsWithIgnore)!;
         // Act
-        await sut.Write<string>("writeAndDelete", "unitTest");
-        await sut.Delete<string>("writeAndDelete");
-        var key = await sut.Read<string>("writeAndDelete");
+        await sut.Write<string>("writeAndDelete", "unitTest").ConfigureAwait(false);
+        await sut.Delete<string>("writeAndDelete").ConfigureAwait(false);
+        var key = await sut.Read<string>("writeAndDelete").ConfigureAwait(false);
         // Assert
         key.Should().BeNull();
     }

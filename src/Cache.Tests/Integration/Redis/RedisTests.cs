@@ -8,7 +8,7 @@ public class RedisTests : BaseTests<RedisCache>, IClassFixture<RedisFixture>
 {
     public RedisTests() : base(new RedisOptions
     {
-        Configuration = "127.0.0.1"
+        Configuration = "127.0.0.1",
     })
     { }
 }
