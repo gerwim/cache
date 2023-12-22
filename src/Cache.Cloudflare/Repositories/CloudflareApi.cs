@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace GerwimFeiken.Cache.Cloudflare.Repositories;
 public class CloudflareApi
@@ -26,7 +28,19 @@ public class CloudflareApi
         };
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiToken);
 
-        return await HttpClient.SendAsync(request);
+        return await HttpClient.SendAsync(request).ConfigureAwait(false);
+    }
+    
+    public async Task<HttpResponseMessage> ListKeys(string? prefix)
+    {
+        var request = new HttpRequestMessage
+        {
+            RequestUri = new Uri($"{_apiUrl}/keys{(!string.IsNullOrEmpty(prefix) ? $"?prefix={prefix}" : null)}"),
+            Method = HttpMethod.Get,
+        };
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiToken);
+
+        return await HttpClient.SendAsync(request).ConfigureAwait(false);
     }
     
     public async Task<HttpResponseMessage> DeleteKey(string keyId)
@@ -38,7 +52,20 @@ public class CloudflareApi
         };
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiToken);
 
-        return await HttpClient.SendAsync(request);
+        return await HttpClient.SendAsync(request).ConfigureAwait(false);
+    }
+    
+    public async Task<HttpResponseMessage> DeleteKeys(IEnumerable<string> keys)
+    {
+        var request = new HttpRequestMessage
+        {
+            RequestUri = new Uri($"{_apiUrl}/bulk"),
+            Method = HttpMethod.Delete,
+        };
+        request.Content = new StringContent(JsonConvert.SerializeObject(keys), Encoding.UTF8, "application/json");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiToken);
+
+        return await HttpClient.SendAsync(request).ConfigureAwait(false);
     }
     
     public async Task<HttpResponseMessage> WriteKey(string keyId, int expirationTtl, string content)
@@ -52,6 +79,6 @@ public class CloudflareApi
 
         request.Content = new StringContent(content);
 
-        return await HttpClient.SendAsync(request);
+        return await HttpClient.SendAsync(request).ConfigureAwait(false);
     }
 }

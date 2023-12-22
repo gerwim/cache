@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using GerwimFeiken.Cache.Exceptions;
 
@@ -56,7 +57,15 @@ namespace GerwimFeiken.Cache
         /// <param name="key"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
+        /// <exception cref="InvalidTypeException">Will be thrown if the type does not match</exception>
         Task<T?> Read<T>(string key);
+        
+        /// <summary>
+        /// Reads an object from cache
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        Task<dynamic?> Read(string key);
 
         /// <summary>
         /// Deletes an object from the cache
@@ -64,7 +73,22 @@ namespace GerwimFeiken.Cache
         /// <param name="key"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
+        [Obsolete("Please use the non generic Delete method instead.")]
         Task Delete<T>(string key);
+        
+        /// <summary>
+        /// Deletes an object from the cache
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        Task Delete(string key);
+        
+        /// <summary>
+        /// Deletes multiple objects from the cache
+        /// </summary>
+        /// <param name="keys"></param>
+        /// <returns></returns>
+        Task Delete(IEnumerable<string> keys);
 
         /// <summary>
         /// Reads a value from the cache if it exists, else execute the function, write it to the cache and return
@@ -74,6 +98,7 @@ namespace GerwimFeiken.Cache
         /// <param name="expireInSeconds"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
+        /// <exception cref="InvalidTypeException">Will be thrown if the type does not match</exception>
         Task<T?> ReadOrWrite<T>(string key, Func<T> func, int? expireInSeconds = null);
         
         /// <summary>
@@ -84,6 +109,7 @@ namespace GerwimFeiken.Cache
         /// <param name="expireInSeconds"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
+        /// <exception cref="InvalidTypeException">Will be thrown if the type does not match</exception>
         Task<T?> ReadOrWrite<T>(string key, Func<Task<T>> func, int? expireInSeconds = null);
         
         /// <summary>
@@ -94,6 +120,7 @@ namespace GerwimFeiken.Cache
         /// <param name="expireIn"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
+        /// <exception cref="InvalidTypeException">Will be thrown if the type does not match</exception>
         Task<T?> ReadOrWrite<T>(string key, Func<T> func, TimeSpan expireIn);
         
         /// <summary>
@@ -104,6 +131,14 @@ namespace GerwimFeiken.Cache
         /// <param name="expireIn"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
+        /// <exception cref="InvalidTypeException">Will be thrown if the type does not match</exception>
         Task<T?> ReadOrWrite<T>(string key, Func<Task<T>> func, TimeSpan expireIn);
+
+        /// <summary>
+        /// Returns a list of all keys and optionally starting with the prefix
+        /// </summary>
+        /// <param name="prefix"></param>
+        /// <returns>An array of keys</returns>
+        Task<IEnumerable<string>> ListKeys(string? prefix = null);
     }
 }

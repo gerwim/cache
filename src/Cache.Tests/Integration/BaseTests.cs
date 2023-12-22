@@ -14,6 +14,23 @@ public abstract class BaseTests<T> where T : BaseCache
     {
         _options = options;
     }
+    
+    [Fact]
+    public async Task DeleteMultipleKeys()
+    {
+        // Arrange 
+        var key = nameof(DeleteMultipleKeys);
+        var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
+        await sut.Write<string>($"{key}1", "unitTest").ConfigureAwait(false);
+        await sut.Write<string>($"{key}2", "unitTest").ConfigureAwait(false);
+        await sut.Write<string>($"{key}3", "unitTest").ConfigureAwait(false);
+
+        // Act
+        var act = async () => await sut.Delete([$"{key}1", $"{key}2", $"{key}3"]).ConfigureAwait(false);
+        
+        // Assert
+        await act.Should().NotThrowAsync().ConfigureAwait(false);
+    }
 
     [Fact]
     public async Task ReadKeyShouldReturnNull()
@@ -21,7 +38,7 @@ public abstract class BaseTests<T> where T : BaseCache
         // Arrange 
         var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
         // Act
-        var key = await sut.Read<string>("test");
+        var key = await sut.Read<string>("test").ConfigureAwait(false);
         // Assert
         key.Should().BeNull();
     }
@@ -33,22 +50,22 @@ public abstract class BaseTests<T> where T : BaseCache
         var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
         var key = nameof(ReadOrWrite);
         // Act
-        var result1 = await sut.ReadOrWrite<string>(key, () => "unitTest");
-        var result2 = await sut.Read<string>(key);
+        var result1 = await sut.ReadOrWrite<string>(key, () => "unitTest").ConfigureAwait(false);
+        var result2 = await sut.Read<string>(key).ConfigureAwait(false);
         // Assert
         result1.Should().Be("unitTest");
         result2.Should().Be("unitTest");
     }
     
     [Fact]
-    public async Task ReadOrWrite_ASync()
+    public async Task ReadOrWrite_Async()
     {
         // Arrange 
         var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
-        var key = nameof(ReadOrWrite_ASync);
+        var key = nameof(ReadOrWrite_Async);
         // Act
-        var result1 = await sut.ReadOrWrite<string>(key, async () => await Task.FromResult("unitTest"));
-        var result2 = await sut.Read<string>(key);
+        var result1 = await sut.ReadOrWrite(key, async () => await Task.FromResult("unitTest").ConfigureAwait(false)).ConfigureAwait(false);
+        var result2 = await sut.Read<string>(key).ConfigureAwait(false);
         // Assert
         result1.Should().Be("unitTest");
         result2.Should().Be("unitTest");
@@ -61,22 +78,22 @@ public abstract class BaseTests<T> where T : BaseCache
         var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
         var key = nameof(ReadOrWrite_TimeSpan);
         // Act
-        var result1 = await sut.ReadOrWrite<string>(key, () => "unitTest", TimeSpan.MaxValue);
-        var result2 = await sut.Read<string>(key);
+        var result1 = await sut.ReadOrWrite<string>(key, () => "unitTest", TimeSpan.MaxValue).ConfigureAwait(false);
+        var result2 = await sut.Read<string>(key).ConfigureAwait(false);
         // Assert
         result1.Should().Be("unitTest");
         result2.Should().Be("unitTest");
     }
     
     [Fact]
-    public async Task ReadOrWrite_TimeSpan_ASync()
+    public async Task ReadOrWrite_TimeSpan_Async()
     {
         // Arrange 
         var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
-        var key = nameof(ReadOrWrite_TimeSpan_ASync);
+        var key = nameof(ReadOrWrite_TimeSpan_Async);
         // Act
-        var result1 = await sut.ReadOrWrite<string>(nameof(ReadOrWrite_TimeSpan_ASync), async () => await Task.FromResult("unitTest"), TimeSpan.MaxValue);
-        var result2 = await sut.Read<string>(key);
+        var result1 = await sut.ReadOrWrite(nameof(ReadOrWrite_TimeSpan_Async), async () => await Task.FromResult("unitTest").ConfigureAwait(false), TimeSpan.MaxValue).ConfigureAwait(false);
+        var result2 = await sut.Read<string>(key).ConfigureAwait(false);
         // Assert
         result1.Should().Be("unitTest");
         result2.Should().Be("unitTest");
@@ -88,8 +105,8 @@ public abstract class BaseTests<T> where T : BaseCache
         // Arrange 
         var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
         // Act
-        await sut.Write<string>("writeAndRead", "unitTest");
-        var key = await sut.Read<string>("writeAndRead");
+        await sut.Write<string>("writeAndRead", "unitTest").ConfigureAwait(false);
+        var key = await sut.Read<string>("writeAndRead").ConfigureAwait(false);
         // Assert
         key.Should().Be("unitTest");
     }
@@ -106,8 +123,8 @@ public abstract class BaseTests<T> where T : BaseCache
             DateTimeValue = DateTime.MinValue,
         };
         // Act
-        await sut.Write(nameof(WriteAndReadKey_ComplexObject), complexObject);
-        var key = await sut.Read<ComplexObject>(nameof(WriteAndReadKey_ComplexObject));
+        await sut.Write(nameof(WriteAndReadKey_ComplexObject), complexObject).ConfigureAwait(false);
+        var key = await sut.Read<ComplexObject>(nameof(WriteAndReadKey_ComplexObject)).ConfigureAwait(false);
         // Assert
         key.Should().Be(complexObject);
     }
@@ -120,10 +137,25 @@ public abstract class BaseTests<T> where T : BaseCache
         // Arrange 
         var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
         // Act
-        await sut.Write($"{nameof(WriteAndReadKey_Bool)}_{value}", value);
-        var key = await sut.Read<bool>($"{nameof(WriteAndReadKey_Bool)}_{value}");
+        await sut.Write($"{nameof(WriteAndReadKey_Bool)}_{value}", value).ConfigureAwait(false);
+        var key = await sut.Read<bool>($"{nameof(WriteAndReadKey_Bool)}_{value}").ConfigureAwait(false);
         // Assert
         key.Should().Be(value);
+    }
+    
+    [Fact]
+    public async Task WriteAndReadKey_Dynamic()
+    {
+        // Arrange
+        var key = nameof(WriteAndReadKey_Dynamic);
+        var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
+        
+        // Act
+        await sut.Write($"{key}", "someValue").ConfigureAwait(false);
+        var result = await sut.Read($"{key}").ConfigureAwait(false);
+        
+        // Assert
+        Assert.Equal("someValue", result);
     }
 
     [Fact]
@@ -132,13 +164,27 @@ public abstract class BaseTests<T> where T : BaseCache
         // Arrange 
         var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
         // Act
-        await sut.Write<string>(nameof(WriteAndReadKey_Expired), "unitTest", 60);
-        var key1 = await sut.Read<string>(nameof(WriteAndReadKey_Expired));
-        await Task.Delay(61000);
-        var key2 = await sut.Read<string>(nameof(WriteAndReadKey_Expired));
+        await sut.Write<string>(nameof(WriteAndReadKey_Expired), "unitTest", 60).ConfigureAwait(false);
+        var key1 = await sut.Read<string>(nameof(WriteAndReadKey_Expired)).ConfigureAwait(false);
+        await Task.Delay(61000).ConfigureAwait(false);
+        var key2 = await sut.Read<string>(nameof(WriteAndReadKey_Expired)).ConfigureAwait(false);
         // Assert
         key1.Should().Be("unitTest");
         key2.Should().BeNull();
+    }
+    
+    [Fact]
+    public async Task WriteAndReadKey_DifferentType()
+    {
+        // Arrange 
+        var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
+        await sut.Write<string>(nameof(WriteAndReadKey_DifferentType), "unitTest", 60).ConfigureAwait(false);
+        
+        // Act
+        var act = async () => await sut.Read<bool?>(nameof(WriteAndReadKey_DifferentType)).ConfigureAwait(false);
+
+        // Assert
+        await act.Should().ThrowAsync<InvalidTypeException>().ConfigureAwait(false);
     }
 
     [Fact]
@@ -147,9 +193,9 @@ public abstract class BaseTests<T> where T : BaseCache
         // Arrange 
         var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
         // Act
-        await sut.Write<string>("writeAndDelete", "unitTest");
-        await sut.Delete<string>("writeAndDelete");
-        var key = await sut.Read<string>("writeAndDelete");
+        await sut.Write<string>("writeAndDelete", "unitTest").ConfigureAwait(false);
+        await sut.Delete("writeAndDelete").ConfigureAwait(false);
+        var key = await sut.Read<string>("writeAndDelete").ConfigureAwait(false);
         // Assert
         key.Should().BeNull();
     }
@@ -160,11 +206,11 @@ public abstract class BaseTests<T> where T : BaseCache
         // Arrange 
         var key = Guid.NewGuid().ToString(); // we set a random value because it's an integration test. Two tests after another might conflict with some providers
         var sut = (T) Activator.CreateInstance(typeof(T), _options)!;
-        await sut.Write<string>(key, "unitTest", true, 60);
+        await sut.Write<string>(key, "unitTest", true, 60).ConfigureAwait(false);
         // Act
-        var act = async () => await sut.Write<string>(key, "unitTest", true, 60);
+        var act = async () => await sut.Write<string>(key, "unitTest", true, 60).ConfigureAwait(false);
         // Assert
-        await act.Should().ThrowAsync<KeyAlreadyExistsException>();
+        await act.Should().ThrowAsync<KeyAlreadyExistsException>().ConfigureAwait(false);
     }
     
     [Theory]
@@ -175,11 +221,11 @@ public abstract class BaseTests<T> where T : BaseCache
         // Arrange 
         var key = Guid.NewGuid().ToString(); // we set a random value because it's an integration test. Two tests after another might conflict with some providers
         var sut = (T) Activator.CreateInstance(typeof(T), _options)!;
-        await sut.Write(key, value, true, 60);
+        await sut.Write(key, value, true, 60).ConfigureAwait(false);
         // Act
-        var act = async () => await sut.Write(key, value, true, 60);
+        var act = async () => await sut.Write(key, value, true, 60).ConfigureAwait(false);
         // Assert
-        await act.Should().ThrowAsync<KeyAlreadyExistsException>();
+        await act.Should().ThrowAsync<KeyAlreadyExistsException>().ConfigureAwait(false);
     }
     
     [Fact]
@@ -188,11 +234,11 @@ public abstract class BaseTests<T> where T : BaseCache
         // Arrange
         var key = Guid.NewGuid().ToString(); // we set a random value because it's an integration test. Two tests after another might conflict with some providers
         var sut = (T) Activator.CreateInstance(typeof(T), _options)!;
-        await sut.Write<bool?>(key, true, true, 60);
+        await sut.Write<bool?>(key, true, true, 60).ConfigureAwait(false);
         // Act
-        var act = async () => await sut.Write<bool?>(key, true, true, 60);
+        var act = async () => await sut.Write<bool?>(key, true, true, 60).ConfigureAwait(false);
         // Assert
-        await act.Should().ThrowAsync<KeyAlreadyExistsException>();
+        await act.Should().ThrowAsync<KeyAlreadyExistsException>().ConfigureAwait(false);
     }
     
     [Fact]
@@ -200,12 +246,12 @@ public abstract class BaseTests<T> where T : BaseCache
     {
         // Arrange 
         var sut = (T) Activator.CreateInstance(typeof(T), _options)!;
-        await sut.Write<string>(nameof(WriteIfNotExistsTrue_Expired), "unitTest", false, 60);
+        await sut.Write<string>(nameof(WriteIfNotExistsTrue_Expired), "unitTest", false, 60).ConfigureAwait(false);
         // Act
-        await Task.Delay(61000);
-        var act = async () => await sut.Write<string>(nameof(WriteIfNotExistsTrue_Expired), "unitTest", true);
+        await Task.Delay(61000).ConfigureAwait(false);
+        var act = async () => await sut.Write<string>(nameof(WriteIfNotExistsTrue_Expired), "unitTest", true).ConfigureAwait(false);
         // Assert
-        await act.Should().NotThrowAsync<KeyAlreadyExistsException>();
+        await act.Should().NotThrowAsync<KeyAlreadyExistsException>().ConfigureAwait(false);
     }
     
     [Fact]
@@ -213,10 +259,46 @@ public abstract class BaseTests<T> where T : BaseCache
     {
         // Arrange 
         var sut = (T) Activator.CreateInstance(typeof(T), _options)!;
-        await sut.Write<string>(nameof(WriteIfNotExistsFalse), "unitTest", false);
+        await sut.Write<string>(nameof(WriteIfNotExistsFalse), "unitTest", false).ConfigureAwait(false);
         // Act
-        var act = async () => await sut.Write<string>(nameof(WriteIfNotExistsFalse), "unitTest", false);
+        var act = async () => await sut.Write<string>(nameof(WriteIfNotExistsFalse), "unitTest", false).ConfigureAwait(false);
         // Assert
-        await act.Should().NotThrowAsync<KeyAlreadyExistsException>();
+        await act.Should().NotThrowAsync<KeyAlreadyExistsException>().ConfigureAwait(false);
+    }
+
+    [Fact]
+    public async Task ListKeys_ReturnsCorrectCount_WithExpired()
+    {
+        // Arrange
+        var key = $"{nameof(ListKeys_ReturnsCorrectCount_WithExpired)}";
+        var sut = (T) Activator.CreateInstance(typeof(T), _options)!;
+        await sut.Write($"{key}1", "value").ConfigureAwait(false);
+        await sut.Write($"{key}2", "value").ConfigureAwait(false);
+        await sut.Write($"{key}3", "value").ConfigureAwait(false);
+        await sut.Write($"{key}4", "value", 61).ConfigureAwait(false);
+
+        await Task.Delay(62000).ConfigureAwait(false);
+        
+        // Act
+        var result = await sut.ListKeys(key).ConfigureAwait(false);
+        
+        // Assert
+        result.Should().HaveCount(3);
+    }
+    
+    [Fact]
+    public async Task ListKeys_ReturnsCorrectCount()
+    {
+        // Arrange
+        var key = $"{nameof(ListKeys_ReturnsCorrectCount)}";
+        var sut = (T) Activator.CreateInstance(typeof(T), _options)!;
+        await sut.Write($"{key}1", "value").ConfigureAwait(false);
+        await sut.Write($"{key}2", "value").ConfigureAwait(false);
+        
+        // Act
+        var result = await sut.ListKeys().ConfigureAwait(false);
+        
+        // Assert
+        result.Should().HaveCountGreaterOrEqualTo(2); // since the storage is shared between all tests, there could be more than 2 entries
     }
 }

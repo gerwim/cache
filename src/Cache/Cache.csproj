@@ -1,11 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.1</TargetFramework>
+        <TargetFramework>netstandard2.0</TargetFramework>
         <Nullable>enable</Nullable>
-        <LangVersion>10</LangVersion>
         <PackageId>GerwimFeiken.Cache</PackageId>
-        <Version>1.4.0</Version>
+        <Version>1.5.0</Version>
         <PackageTags>Cache;Key value;keyvalue</PackageTags>
         <Description>
            This library provides you with a simple key value caching solution for your application.

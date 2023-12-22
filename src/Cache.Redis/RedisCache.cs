@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using GerwimFeiken.Cache.Exceptions;
 using GerwimFeiken.Cache.Models;
@@ -19,17 +21,22 @@ namespace GerwimFeiken.Cache.Redis
         {
             if (options is null) throw new ArgumentNullException(nameof(options));
 
-            _redis = ConnectionMultiplexer.Connect(options.GetRequiredValue(x => x.Configuration));
+            _redis = ConnectionMultiplexer.Connect(options.GetRequiredValue(x => x.Configuration)!);
             _expirationTtl = options.GetRequiredValue(x => x.DefaultExpirationTtl);
             _ignoreTimeouts = options.GetRequiredValue(x => x.IgnoreTimeouts);
         }
         
         protected override async Task DeleteImplementation(string key)
         {
+            await DeleteImplementation([key]).ConfigureAwait(false);
+        }
+
+        protected override async Task DeleteImplementation(IEnumerable<string> keys)
+        {
             try
             {
                 var redisDb = _redis.GetDatabase();
-                await redisDb.KeyDeleteAsync(key);
+                await redisDb.KeyDeleteAsync(keys.Select(x => new RedisKey(x)).ToArray()).ConfigureAwait(false);
             }
             catch (RedisConnectionException ex)
             {
@@ -45,14 +52,24 @@ namespace GerwimFeiken.Cache.Redis
             }
         }
 
+        protected override Task<IEnumerable<string>> ListKeysImplementation(string? prefix)
+        {
+            var endpoints = _redis.GetEndPoints();
+            var server = _redis.GetServer(endpoints[0]);
+
+            var keys = server.Keys(pattern: $"{prefix}*").ToList();
+
+            return Task.FromResult(keys.Select(x => x.ToString()));
+        }
+
         protected override async Task<WriteResult> WriteImplementation<T>(string key, T value, int? expireInSeconds)
         {
-            return await RedisWrite(key, value, expireInSeconds, When.Always);
+            return await RedisWrite(key, value, expireInSeconds, When.Always).ConfigureAwait(false);
         }
 
         protected override async Task<WriteResult> WriteImplementation<T>(string key, T value, bool errorIfExists, int? expireInSeconds)
         {
-            return await RedisWrite(key, value, expireInSeconds, errorIfExists ? When.NotExists : When.Always);
+            return await RedisWrite(key, value, expireInSeconds, errorIfExists ? When.NotExists : When.Always).ConfigureAwait(false);
         }
         
         private async Task<WriteResult> RedisWrite<T>(string key, T value, int? expireInSeconds, When when) {
@@ -65,7 +82,7 @@ namespace GerwimFeiken.Cache.Redis
                 });
 
                 var response =
-                    await redisDb.StringSetAsync(key, json, TimeSpan.FromSeconds(expireInSeconds ?? _expirationTtl), when);
+                    await redisDb.StringSetAsync(key, json, TimeSpan.FromSeconds(expireInSeconds ?? _expirationTtl), when).ConfigureAwait(false);
                 if (!response)
                 {
                     if (when is When.NotExists) throw new KeyAlreadyExistsException();
@@ -93,7 +110,7 @@ namespace GerwimFeiken.Cache.Redis
             try
             {
                 var redisDb = _redis.GetDatabase();
-                var response = await redisDb.StringGetAsync(key);
+                var response = await redisDb.StringGetAsync(key).ConfigureAwait(false);
 
                 if (!response.HasValue) return ReadResult<T?>.Fail(default, ReadReason.KeyDoesNotExist);
 

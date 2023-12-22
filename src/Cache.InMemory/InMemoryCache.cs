@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GerwimFeiken.Cache.Exceptions;
@@ -26,11 +28,33 @@ namespace GerwimFeiken.Cache.InMemory
             return Task.CompletedTask;
         }
 
+        protected override Task DeleteImplementation(IEnumerable<string> keys)
+        {
+            foreach (var key in keys)
+            {
+                DeleteImplementation(key);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        protected override async Task<IEnumerable<string>> ListKeysImplementation(string? prefix)
+        {
+            var keys = new List<string>();
+            foreach (var s in LocalCache.Keys.Where(x => string.IsNullOrWhiteSpace(prefix) || x.StartsWith(prefix)))
+            {
+                var result = await ReadImplementation<dynamic?>(s).ConfigureAwait(false);
+                if (result.OperationStatus is Status.Ok) keys.Add(s);
+            }
+            
+            return keys;
+        }
+
         protected override async Task<WriteResult> WriteImplementation<T>(string key, T value, int? expireInSeconds)
         {
             try
             {
-                await WriteLock.WaitAsync();
+                await WriteLock.WaitAsync().ConfigureAwait(false);
                 LocalCache[key] = ConvertValue(value, expireInSeconds);
             }
             catch
@@ -49,15 +73,15 @@ namespace GerwimFeiken.Cache.InMemory
         {
             if (!errorIfExists)
             {
-                return await WriteImplementation(key, value, expireInSeconds);
+                return await WriteImplementation(key, value, expireInSeconds).ConfigureAwait(false);
             }
 
             try
             {
-                await WriteLock.WaitAsync();
+                await WriteLock.WaitAsync().ConfigureAwait(false);
 
                 // Read key -- to make sure it's deleted if expired
-                _ = await ReadImplementation<T>(key);
+                _ = await ReadImplementation<T>(key).ConfigureAwait(false);
 
                 if (!LocalCache.TryAdd(key, ConvertValue(value, expireInSeconds)))
                 {

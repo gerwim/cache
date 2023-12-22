@@ -1,14 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.1</TargetFramework>
+        <TargetFramework>netstandard2.0</TargetFramework>
         <AssemblyName>GerwimFeiken.Cache.InMemory</AssemblyName>
         <RootNamespace>GerwimFeiken.Cache.InMemory</RootNamespace>
         <Nullable>enable</Nullable>
-        <LangVersion>10</LangVersion>
-
         <PackageId>GerwimFeiken.Cache.InMemory</PackageId>
-        <Version>1.3.0</Version>
+        <Version>1.5.0</Version>
         <PackageTags>Cache;Key value;keyvalue;</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageReadmeFile>README.md</PackageReadmeFile>
