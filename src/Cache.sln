@@ -10,6 +10,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cache.InMemory", "Cache.InM
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cache.Redis", "Cache.Redis\Cache.Redis.csproj", "{EA79D62F-D695-45F1-A212-B50EE8928E2F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cache.Generators", "Cache.Generators\Cache.Generators\Cache.Generators.csproj", "{4392E2CB-9269-44EB-802D-FE03D04093DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cache.Generators.Sample", "Cache.Generators\Cache.Generators.Sample\Cache.Generators.Sample.csproj", "{022D4128-40A5-48AD-9BE9-C72D1C3D91EC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +40,13 @@ Global
 		{EA79D62F-D695-45F1-A212-B50EE8928E2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA79D62F-D695-45F1-A212-B50EE8928E2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA79D62F-D695-45F1-A212-B50EE8928E2F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4392E2CB-9269-44EB-802D-FE03D04093DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4392E2CB-9269-44EB-802D-FE03D04093DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4392E2CB-9269-44EB-802D-FE03D04093DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4392E2CB-9269-44EB-802D-FE03D04093DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{022D4128-40A5-48AD-9BE9-C72D1C3D91EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{022D4128-40A5-48AD-9BE9-C72D1C3D91EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{022D4128-40A5-48AD-9BE9-C72D1C3D91EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{022D4128-40A5-48AD-9BE9-C72D1C3D91EC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
