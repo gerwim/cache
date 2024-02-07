@@ -9,7 +9,6 @@ using GerwimFeiken.Cache.Cloudflare.Repositories;
 using GerwimFeiken.Cache.Exceptions;
 using GerwimFeiken.Cache.Models;
 using GerwimFeiken.Cache.Utils;
-using Newtonsoft.Json;
 
 namespace GerwimFeiken.Cache.Cloudflare
 {
@@ -62,7 +61,7 @@ namespace GerwimFeiken.Cache.Cloudflare
                 throw new DeleteException($"Could not list keys from Cloudflare: {await response.Content.ReadAsStringAsync().ConfigureAwait(false)}");
             }
             
-            var obj = JsonConvert.DeserializeObject<CloudflareListKeysResponse>(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
+            var obj = DeserializeObject<CloudflareListKeysResponse>(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
             return obj?.Result?.Select(x => x.Name) ?? Array.Empty<string>();
         }
 
@@ -73,10 +72,7 @@ namespace GerwimFeiken.Cache.Cloudflare
                 throw new WriteException("Expiration should be 60 or greater.");
             }
             
-            string json = JsonConvert.SerializeObject(value, settings: new JsonSerializerSettings
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-            });
+            string json = SerializeObject(value);
             var response = await _cloudflareApi.WriteKey(key, expireInSeconds ?? _expirationTtl, json).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
@@ -110,7 +106,7 @@ namespace GerwimFeiken.Cache.Cloudflare
 
             if (response.Content is null || response.StatusCode is HttpStatusCode.NotFound) return ReadResult<T?>.Fail(default, ReadReason.KeyDoesNotExist);
 
-            var obj = JsonConvert.DeserializeObject<T>(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
+            var obj = DeserializeObject<T>(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
             return ReadResult<T?>.Ok(obj);
         }
     }

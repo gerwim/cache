@@ -19,7 +19,6 @@
 
     <ItemGroup>
       <PackageReference Include="StackExchange.Redis" Version="2.7.10" />
-      <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     </ItemGroup>
 
     <ItemGroup>

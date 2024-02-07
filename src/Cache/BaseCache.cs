@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using GerwimFeiken.Cache.Exceptions;
 using GerwimFeiken.Cache.Models;
+using Newtonsoft.Json;
 
 namespace GerwimFeiken.Cache
 {
@@ -122,5 +123,30 @@ namespace GerwimFeiken.Cache
         protected abstract Task<ReadResult<T?>> ReadImplementation<T>(string key);
         protected abstract Task<WriteResult> WriteImplementation<T>(string key, T value, int? expireInSeconds);
         protected abstract Task<WriteResult> WriteImplementation<T>(string key, T value, bool errorIfExists, int? expireInSeconds);
+
+        /// <summary>
+        /// Serializes the object using Newtonsoft.Json
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        protected virtual string? SerializeObject(object? value)
+        {
+            if (value is null) return null;
+            
+            return JsonConvert.SerializeObject(value, settings: new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            });
+        }
+        
+        /// <summary>
+        /// Deserializes the object using Newtonsoft.Json
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        protected virtual T? DeserializeObject<T>(string value)
+        {
+            return JsonConvert.DeserializeObject<T>(value);
+        }
     }
 }

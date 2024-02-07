@@ -6,7 +6,6 @@ using GerwimFeiken.Cache.Exceptions;
 using GerwimFeiken.Cache.Models;
 using GerwimFeiken.Cache.Redis.Options;
 using GerwimFeiken.Cache.Utils;
-using Newtonsoft.Json;
 using StackExchange.Redis;
 
 namespace GerwimFeiken.Cache.Redis
@@ -76,10 +75,7 @@ namespace GerwimFeiken.Cache.Redis
             try
             {
                 var redisDb = _redis.GetDatabase();
-                string json = JsonConvert.SerializeObject(value, settings: new JsonSerializerSettings
-                {
-                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                });
+                string json = SerializeObject(value);
 
                 var response =
                     await redisDb.StringSetAsync(key, json, TimeSpan.FromSeconds(expireInSeconds ?? _expirationTtl), when).ConfigureAwait(false);
@@ -114,7 +110,7 @@ namespace GerwimFeiken.Cache.Redis
 
                 if (!response.HasValue) return ReadResult<T?>.Fail(default, ReadReason.KeyDoesNotExist);
 
-                var obj = JsonConvert.DeserializeObject<T>(response.ToString());
+                var obj = DeserializeObject<T>(response.ToString());
                 return ReadResult<T?>.Ok(obj);
             }
             catch (RedisConnectionException ex)

@@ -12,10 +12,6 @@
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageProjectUrl>https://github.com/gerwim/cache</PackageProjectUrl>
     </PropertyGroup>
-
-    <ItemGroup>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    </ItemGroup>
     
     <ItemGroup>
       <ProjectReference Include="..\Cache\Cache.csproj" />

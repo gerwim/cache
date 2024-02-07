@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using GerwimFeiken.Cache.Exceptions;
 using GerwimFeiken.Cache.InMemory.Options;
 using GerwimFeiken.Cache.Models;
-using Newtonsoft.Json;
 
 namespace GerwimFeiken.Cache.InMemory
 {
@@ -102,7 +101,7 @@ namespace GerwimFeiken.Cache.InMemory
                 return Task.FromResult(ReadResult<T?>.Fail(default, ReadReason.KeyDoesNotExist));
 
             if (DateTime.UtcNow <= value.expireAtUtc)
-                return Task.FromResult(ReadResult<T?>.Ok(JsonConvert.DeserializeObject<T?>(value.data)));
+                return Task.FromResult(ReadResult<T?>.Ok(DeserializeObject<T?>(value.data)));
             
             LocalCache.TryRemove(key, out _);
             return Task.FromResult(ReadResult<T?>.Fail(default, ReadReason.KeyDoesNotExist));
@@ -111,10 +110,8 @@ namespace GerwimFeiken.Cache.InMemory
         private (DateTime expireAtUtc, string data) ConvertValue<T>(T value, int? expireInSeconds)
         {
             return (DateTime.UtcNow.AddSeconds(expireInSeconds ?? _options.DefaultExpirationTtl),
-                JsonConvert.SerializeObject(value, settings: new JsonSerializerSettings
-                {
-                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                }));
+                    SerializeObject(value)
+                );
         }
     }
 }
