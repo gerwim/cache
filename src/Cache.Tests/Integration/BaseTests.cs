@@ -129,6 +129,22 @@ public abstract class BaseTests<T> where T : BaseCache
         key.Should().Be(complexObject);
     }
     
+    [Fact]
+    public async Task WriteAndReadKey_NonPublicSetters()
+    {
+        // Arrange 
+        var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
+        var key = nameof(WriteAndReadKey_NonPublicSetters);
+        var nonPublic = new NonPublic("private", "init");
+        
+        // Act
+        await sut.Write(key, nonPublic).ConfigureAwait(false);
+        var result = await sut.Read<NonPublic>(key).ConfigureAwait(false);
+        
+        // Assert
+        result.Should().Be(nonPublic);
+    }
+    
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
