@@ -122,11 +122,35 @@ public abstract class BaseTests<T> where T : BaseCache
             GuidValue = Guid.Empty,
             DateTimeValue = DateTime.MinValue,
         };
+        var key = nameof(WriteAndReadKey_ComplexObject);
+        
         // Act
-        await sut.Write(nameof(WriteAndReadKey_ComplexObject), complexObject).ConfigureAwait(false);
-        var key = await sut.Read<ComplexObject>(nameof(WriteAndReadKey_ComplexObject)).ConfigureAwait(false);
+        await sut.Write(key, complexObject).ConfigureAwait(false);
+        var result = await sut.Read<ComplexObject>(key).ConfigureAwait(false);
+        
         // Assert
-        key.Should().Be(complexObject);
+        result.Should().Be(complexObject);
+    }
+    
+    [Fact]
+    public async Task WriteAndReadKey_ComplexObject_FromInterface()
+    {
+        // Arrange 
+        var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
+        var complexObject = new ComplexObject
+        {
+            StringValue = "String",
+            GuidValue = Guid.Empty,
+            DateTimeValue = DateTime.MinValue,
+        };
+        var key = nameof(WriteAndReadKey_ComplexObject);
+        
+        // Act
+        await sut.Write(key, complexObject).ConfigureAwait(false);
+        var result = await sut.Read<IComplexObject>(key).ConfigureAwait(false);
+        
+        // Assert
+        result.Should().Be(complexObject);
     }
     
     [Fact]

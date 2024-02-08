@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 ---
+## [1.7.0] - 2024-02-08
+
+### Features
+
+- allow custom JsonSerializerSettings - ([41d564d](https://github.com/gerwim/cache/commit/41d564db1b58fb7f60936112c22dcafe6d7284b4)) - Gerwim Feiken
+- set TypeNameHandling to TypeNameHandling.All - ([3949734](https://github.com/gerwim/cache/commit/394973409eff23d9469839fa0f5bfb02fa55e9e5)) - Gerwim Feiken
+
+### Miscellaneous Chores
+
+- bump version to 1.7.0 - ([b194f86](https://github.com/gerwim/cache/commit/b194f86633f416e4c29927b19315d9c82402edef)) - Gerwim Feiken
+
+---
 ## [1.6.0] - 2024-02-08
 
 ### Bug Fixes

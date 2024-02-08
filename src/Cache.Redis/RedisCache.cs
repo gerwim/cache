@@ -16,7 +16,7 @@ namespace GerwimFeiken.Cache.Redis
         private readonly bool _ignoreTimeouts;
         private readonly ConnectionMultiplexer _redis;
         
-        public RedisCache(IRedisOptions options)
+        public RedisCache(IRedisOptions options) : base(options)
         {
             if (options is null) throw new ArgumentNullException(nameof(options));
 

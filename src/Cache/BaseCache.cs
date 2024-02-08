@@ -1,16 +1,24 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GerwimFeiken.Cache.ContractResolvers;
 using GerwimFeiken.Cache.Exceptions;
 using GerwimFeiken.Cache.Models;
+using GerwimFeiken.Cache.Options;
+using GerwimFeiken.Cache.SerializerSettings;
 using Newtonsoft.Json;
 
 namespace GerwimFeiken.Cache
 {
     public abstract class BaseCache : ICache
     {
+        private readonly JsonSerializerSettings _jsonSerializerSettings;
+        
+        protected BaseCache(IOptions options)
+        {
+            _jsonSerializerSettings = options.JsonSerializerSettings ??
+                                      new DefaultSerializerSettings();
+        }
+        
         public Task Write<T>(string key, T value, int? expireInSeconds = null)
         {
             return WriteImplementation(key, value, expireInSeconds);
@@ -134,11 +142,7 @@ namespace GerwimFeiken.Cache
         {
             if (value is null) return null;
             
-            return JsonConvert.SerializeObject(value, settings: new JsonSerializerSettings
-            {
-                ContractResolver = new PrivateSetterAndCtorContractResolver(),
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-            });
+            return JsonConvert.SerializeObject(value, settings: _jsonSerializerSettings);
         }
         
         /// <summary>
@@ -148,10 +152,7 @@ namespace GerwimFeiken.Cache
         /// <returns></returns>
         protected virtual T? DeserializeObject<T>(string value)
         {
-            return JsonConvert.DeserializeObject<T>(value, new JsonSerializerSettings
-            {
-                ContractResolver = new PrivateSetterAndCtorContractResolver(),
-            });
+            return JsonConvert.DeserializeObject<T>(value, _jsonSerializerSettings);
         }
     }
 }
