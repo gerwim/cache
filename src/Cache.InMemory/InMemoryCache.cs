@@ -16,7 +16,7 @@ namespace GerwimFeiken.Cache.InMemory
         private static ConcurrentDictionary<string, (DateTime expireAtUtc, string data)> LocalCache { get; } = new();
         private static readonly SemaphoreSlim WriteLock = new(1, 1);
         
-        public InMemoryCache(IInMemoryOptions options)
+        public InMemoryCache(IInMemoryOptions options) : base(options)
         {
             _options = options;
         }

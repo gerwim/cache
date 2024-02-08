@@ -17,7 +17,7 @@ namespace GerwimFeiken.Cache.Cloudflare
         private readonly int _expirationTtl;
         private readonly CloudflareApi _cloudflareApi;
         
-        public CloudflareCache(ICloudflareOptions options)
+        public CloudflareCache(ICloudflareOptions options) : base(options)
         {
             if (options is null) throw new ArgumentNullException(nameof(options));
 
