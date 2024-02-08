@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 ---
+## [1.6.0] - 2024-02-08
+
+### Bug Fixes
+
+- private setters are now populated when deserializing - ([157908a](https://github.com/gerwim/cache/commit/157908aad6f32be546a53f8dd45c13e426e989f3)) - Gerwim Feiken
+
+### Miscellaneous Chores
+
+- bump versions to 1.6.0 - ([5d6a1ee](https://github.com/gerwim/cache/commit/5d6a1ee8be8cc552a448b2bc7a2e8634d601284d)) - Gerwim Feiken
+
+### Refactoring
+
+- move (de)serialization to BaseCache - ([698c867](https://github.com/gerwim/cache/commit/698c867bf19dc1d8e990082cfb152a88ca19c158)) - Gerwim Feiken
+
+---
 ## [1.5.0] - 2023-12-22
 
 :warning: key hashing has been removed (see [f7d14aa](https://github.com/gerwim/cache/commit/f7d14aa0a69f6eba461b67fb7f3158213c1c536f)). This means keys were previously bound to a type. E.g. this:
