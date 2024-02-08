@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using GerwimFeiken.Cache.ContractResolvers;
 using GerwimFeiken.Cache.Exceptions;
 using GerwimFeiken.Cache.Models;
 using Newtonsoft.Json;
@@ -135,6 +136,7 @@ namespace GerwimFeiken.Cache
             
             return JsonConvert.SerializeObject(value, settings: new JsonSerializerSettings
             {
+                ContractResolver = new PrivateSetterAndCtorContractResolver(),
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
             });
         }
@@ -146,7 +148,10 @@ namespace GerwimFeiken.Cache
         /// <returns></returns>
         protected virtual T? DeserializeObject<T>(string value)
         {
-            return JsonConvert.DeserializeObject<T>(value);
+            return JsonConvert.DeserializeObject<T>(value, new JsonSerializerSettings
+            {
+                ContractResolver = new PrivateSetterAndCtorContractResolver(),
+            });
         }
     }
 }
