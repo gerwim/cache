@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 ---
+## [1.7.1] - 2024-02-15
+
+### Bug Fixes
+
+- set TypeNameHandling to Objects - ([4023a22](https://github.com/gerwim/cache/commit/4023a22f8b25ede1f21593377446c2041b5ad8c3)) - Gerwim Feiken
+
+### Miscellaneous Chores
+
+- update version to 1.7.1 - ([646c5f2](https://github.com/gerwim/cache/commit/646c5f2f88a33df0852cfe5e3be0772cc4603fb2)) - Gerwim Feiken
+
+---
 ## [1.7.0] - 2024-02-08
 
 ### Features

@@ -154,6 +154,29 @@ public abstract class BaseTests<T> where T : BaseCache
     }
     
     [Fact]
+    public async Task WriteAndReadKey_ComplexObject_FromInterface_InIEnumerable()
+    {
+        // Arrange 
+        var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
+        var complexObject = new ComplexObject
+        {
+            StringValue = "String",
+            GuidValue = Guid.Empty,
+            DateTimeValue = DateTime.MinValue,
+        };
+        IEnumerable<IComplexObject> enumerable = [complexObject];
+        var type = enumerable.GetType();
+        var key = nameof(WriteAndReadKey_ComplexObject);
+        
+        // Act
+        await sut.Write(key, enumerable).ConfigureAwait(false);
+        var result = await sut.Read<IEnumerable<IComplexObject>>(key).ConfigureAwait(false);
+        
+        // Assert
+        result.First().Should().Be(complexObject);
+    }
+    
+    [Fact]
     public async Task WriteAndReadKey_NonPublicSetters()
     {
         // Arrange 
