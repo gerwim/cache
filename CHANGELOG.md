@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 ---
+## [1.8.0] - 2024-02-19
+
+### Bug Fixes
+
+-  [**breaking**]value types are now returned as null instead of default if not found - ([7d29faa](https://github.com/gerwim/cache/commit/7d29faa36174e50a1019f0b741c166333ef8909c)) - Gerwim Feiken
+
+### Miscellaneous Chores
+
+- bump StackExchange.Redis - ([81f1ec5](https://github.com/gerwim/cache/commit/81f1ec52828bd40e8d61ac3fb09c9084031ead00)) - Gerwim Feiken
+- bump versions - ([60eb27c](https://github.com/gerwim/cache/commit/60eb27cca235044433f311054fe8b78838f4d28b)) - Gerwim Feiken
+
+---
 ## [1.7.1] - 2024-02-15
 
 ### Bug Fixes
