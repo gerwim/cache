@@ -33,7 +33,7 @@ public abstract class BaseTests<T> where T : BaseCache
     }
 
     [Fact]
-    public async Task ReadKeyShouldReturnNull()
+    public async Task ReadKeyShouldReturnNull_ReferenceType()
     {
         // Arrange 
         var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
@@ -41,6 +41,18 @@ public abstract class BaseTests<T> where T : BaseCache
         var key = await sut.Read<string>("test").ConfigureAwait(false);
         // Assert
         key.Should().BeNull();
+    }
+    
+    [Fact]
+    public async Task ReadKeyShouldReturnNull_ValueType()
+    {
+        // Arrange 
+        var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
+        var key = nameof(ReadKeyShouldReturnNull_ValueType);
+        // Act
+        var result = await sut.Read<int>(key).ConfigureAwait(false);
+        // Assert
+        result.Should().BeNull();
     }
     
     [Fact]
@@ -244,10 +256,26 @@ public abstract class BaseTests<T> where T : BaseCache
         await sut.Write<string>(nameof(WriteAndReadKey_DifferentType), "unitTest", 60).ConfigureAwait(false);
         
         // Act
-        var act = async () => await sut.Read<bool?>(nameof(WriteAndReadKey_DifferentType)).ConfigureAwait(false);
+        var act = async () => await sut.Read<bool>(nameof(WriteAndReadKey_DifferentType)).ConfigureAwait(false);
 
         // Assert
         await act.Should().ThrowAsync<InvalidTypeException>().ConfigureAwait(false);
+    }
+    
+    [Fact]
+    public async Task WriteAndReadKey_DifferentNullability()
+    {
+        // Arrange 
+        var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
+        const int expectedResult = 10;
+        var key = nameof(WriteAndReadKey_DifferentNullability);
+        await sut.Write<int?>(key, expectedResult, 60).ConfigureAwait(false);
+        
+        // Act
+        var result = await sut.Read<int>(key).ConfigureAwait(false);
+
+        // Assert
+        result.Should().Be(expectedResult);
     }
 
     [Fact]
