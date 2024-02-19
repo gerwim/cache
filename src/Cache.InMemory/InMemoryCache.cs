@@ -42,14 +42,26 @@ namespace GerwimFeiken.Cache.InMemory
             var keys = new List<string>();
             foreach (var s in LocalCache.Keys.Where(x => string.IsNullOrWhiteSpace(prefix) || x.StartsWith(prefix)))
             {
-                var result = await ReadImplementation<dynamic?>(s).ConfigureAwait(false);
+                var result = await ReadImplementation(s).ConfigureAwait(false);
                 if (result.OperationStatus is Status.Ok) keys.Add(s);
             }
             
             return keys;
         }
 
-        protected override async Task<WriteResult> WriteImplementation<T>(string key, T value, int? expireInSeconds)
+        protected override Task<ReadResult> ReadImplementation(string key)
+        {
+            if (!LocalCache.TryGetValue(key, out var value))
+                return Task.FromResult(ReadResult.Fail(null, ReadReason.KeyDoesNotExist));
+
+            if (DateTime.UtcNow <= value.expireAtUtc)
+                return Task.FromResult(ReadResult.Ok(value.data));
+            
+            LocalCache.TryRemove(key, out _);
+            return Task.FromResult(ReadResult.Fail(null, ReadReason.KeyDoesNotExist));
+        }
+
+        protected override async Task<WriteResult> WriteImplementation(string key, string value, int? expireInSeconds)
         {
             try
             {
@@ -68,7 +80,7 @@ namespace GerwimFeiken.Cache.InMemory
             return WriteResult.Ok();
         }
 
-        protected override async Task<WriteResult> WriteImplementation<T>(string key, T value, bool errorIfExists, int? expireInSeconds)
+        protected override async Task<WriteResult> WriteImplementation(string key, string value, bool errorIfExists, int? expireInSeconds)
         {
             if (!errorIfExists)
             {
@@ -80,7 +92,7 @@ namespace GerwimFeiken.Cache.InMemory
                 await WriteLock.WaitAsync().ConfigureAwait(false);
 
                 // Read key -- to make sure it's deleted if expired
-                _ = await ReadImplementation<T>(key).ConfigureAwait(false);
+                _ = await ReadImplementation(key).ConfigureAwait(false);
 
                 if (!LocalCache.TryAdd(key, ConvertValue(value, expireInSeconds)))
                 {
@@ -94,23 +106,11 @@ namespace GerwimFeiken.Cache.InMemory
 
             return WriteResult.Ok();
         }
-
-        protected override Task<ReadResult<T?>> ReadImplementation<T>(string key) where T : default
-        {
-            if (!LocalCache.TryGetValue(key, out var value))
-                return Task.FromResult(ReadResult<T?>.Fail(default, ReadReason.KeyDoesNotExist));
-
-            if (DateTime.UtcNow <= value.expireAtUtc)
-                return Task.FromResult(ReadResult<T?>.Ok(DeserializeObject<T?>(value.data)));
-            
-            LocalCache.TryRemove(key, out _);
-            return Task.FromResult(ReadResult<T?>.Fail(default, ReadReason.KeyDoesNotExist));
-        }
-
-        private (DateTime expireAtUtc, string data) ConvertValue<T>(T value, int? expireInSeconds)
+        
+        private (DateTime expireAtUtc, string? data) ConvertValue(string value, int? expireInSeconds)
         {
             return (DateTime.UtcNow.AddSeconds(expireInSeconds ?? _options.DefaultExpirationTtl),
-                    SerializeObject(value)
+                    value
                 );
         }
     }

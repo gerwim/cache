@@ -61,24 +61,48 @@ namespace GerwimFeiken.Cache.Redis
             return Task.FromResult(keys.Select(x => x.ToString()));
         }
 
-        protected override async Task<WriteResult> WriteImplementation<T>(string key, T value, int? expireInSeconds)
+        protected override async Task<ReadResult> ReadImplementation(string key)
+        {
+            try
+            {
+                var redisDb = _redis.GetDatabase();
+                var response = await redisDb.StringGetAsync(key).ConfigureAwait(false);
+
+                if (!response.HasValue) return ReadResult.Fail(null, ReadReason.KeyDoesNotExist);
+                
+                return ReadResult.Ok(response.ToString());
+            }
+            catch (RedisConnectionException ex)
+            {
+                if (_ignoreTimeouts && ex.Message.StartsWith("The message timed out")) return ReadResult.Fail(null, ReadReason.Timeout);
+
+                throw;
+            }
+            catch (RedisTimeoutException)
+            {
+                if (_ignoreTimeouts) return ReadResult.Fail(null, ReadReason.Timeout);
+
+                throw;
+            }
+        }
+
+        protected override async Task<WriteResult> WriteImplementation(string key, string value, int? expireInSeconds)
         {
             return await RedisWrite(key, value, expireInSeconds, When.Always).ConfigureAwait(false);
         }
 
-        protected override async Task<WriteResult> WriteImplementation<T>(string key, T value, bool errorIfExists, int? expireInSeconds)
+        protected override async Task<WriteResult> WriteImplementation(string key, string value, bool errorIfExists, int? expireInSeconds)
         {
             return await RedisWrite(key, value, expireInSeconds, errorIfExists ? When.NotExists : When.Always).ConfigureAwait(false);
         }
         
-        private async Task<WriteResult> RedisWrite<T>(string key, T value, int? expireInSeconds, When when) {
+        private async Task<WriteResult> RedisWrite(string key, string value, int? expireInSeconds, When when) {
             try
             {
                 var redisDb = _redis.GetDatabase();
-                string json = SerializeObject(value);
 
                 var response =
-                    await redisDb.StringSetAsync(key, json, TimeSpan.FromSeconds(expireInSeconds ?? _expirationTtl), when).ConfigureAwait(false);
+                    await redisDb.StringSetAsync(key, value, TimeSpan.FromSeconds(expireInSeconds ?? _expirationTtl), when).ConfigureAwait(false);
                 if (!response)
                 {
                     if (when is When.NotExists) throw new KeyAlreadyExistsException();
@@ -99,32 +123,6 @@ namespace GerwimFeiken.Cache.Redis
             }
 
             return WriteResult.Ok();
-        }
-
-        protected override async Task<ReadResult<T?>> ReadImplementation<T>(string key) where T : default
-        {
-            try
-            {
-                var redisDb = _redis.GetDatabase();
-                var response = await redisDb.StringGetAsync(key).ConfigureAwait(false);
-
-                if (!response.HasValue) return ReadResult<T?>.Fail(default, ReadReason.KeyDoesNotExist);
-
-                var obj = DeserializeObject<T>(response.ToString());
-                return ReadResult<T?>.Ok(obj);
-            }
-            catch (RedisConnectionException ex)
-            {
-                if (_ignoreTimeouts && ex.Message.StartsWith("The message timed out")) return ReadResult<T?>.Fail(default, ReadReason.Timeout);
-
-                throw;
-            }
-            catch (RedisTimeoutException)
-            {
-                if (_ignoreTimeouts) return ReadResult<T?>.Fail(default, ReadReason.Timeout);
-
-                throw;
-            }
         }
     }
 }

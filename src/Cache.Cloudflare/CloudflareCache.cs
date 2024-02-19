@@ -65,37 +65,7 @@ namespace GerwimFeiken.Cache.Cloudflare
             return obj?.Result?.Select(x => x.Name) ?? Array.Empty<string>();
         }
 
-        protected override async Task<WriteResult> WriteImplementation<T>(string key, T value, int? expireInSeconds)
-        {
-            if ((expireInSeconds ?? _expirationTtl) < 60)
-            {
-                throw new WriteException("Expiration should be 60 or greater.");
-            }
-            
-            string json = SerializeObject(value);
-            var response = await _cloudflareApi.WriteKey(key, expireInSeconds ?? _expirationTtl, json).ConfigureAwait(false);
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new WriteException($"Could not write to Cloudflare: {await response.Content.ReadAsStringAsync().ConfigureAwait(false)}");
-            }
-
-            return WriteResult.Ok();
-        }
-
-        protected override async Task<WriteResult> WriteImplementation<T>(string key, T value, bool errorIfExists, int? expireInSeconds)
-        {
-            if (errorIfExists)
-            {
-                var result = await ReadImplementation<T?>(key).ConfigureAwait(false);
-                if (result.OperationStatus is Status.Ok) throw new KeyAlreadyExistsException();
-            }
-
-            await WriteImplementation(key, value, expireInSeconds).ConfigureAwait(false);
-
-            return WriteResult.Ok();
-        }
-
-        protected override async Task<ReadResult<T?>> ReadImplementation<T>(string key) where T : default
+        protected override async Task<ReadResult> ReadImplementation(string key)
         {
             var response = await _cloudflareApi.GetKey(key).ConfigureAwait(false);
 
@@ -104,10 +74,38 @@ namespace GerwimFeiken.Cache.Cloudflare
                 throw new ReadException($"Could not read from Cloudflare: {await response.Content.ReadAsStringAsync().ConfigureAwait(false)}");
             }
 
-            if (response.Content is null || response.StatusCode is HttpStatusCode.NotFound) return ReadResult<T?>.Fail(default, ReadReason.KeyDoesNotExist);
+            if (response.Content is null || response.StatusCode is HttpStatusCode.NotFound) return ReadResult.Fail(null, ReadReason.KeyDoesNotExist);
 
-            var obj = DeserializeObject<T>(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
-            return ReadResult<T?>.Ok(obj);
+            return ReadResult.Ok(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
+        }
+
+        protected override async Task<WriteResult> WriteImplementation(string key, string value, int? expireInSeconds)
+        {
+            if ((expireInSeconds ?? _expirationTtl) < 60)
+            {
+                throw new WriteException("Expiration should be 60 or greater.");
+            }
+            
+            var response = await _cloudflareApi.WriteKey(key, expireInSeconds ?? _expirationTtl, value).ConfigureAwait(false);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new WriteException($"Could not write to Cloudflare: {await response.Content.ReadAsStringAsync().ConfigureAwait(false)}");
+            }
+
+            return WriteResult.Ok();
+        }
+        
+        protected override async Task<WriteResult> WriteImplementation(string key, string value, bool errorIfExists, int? expireInSeconds)
+        {
+            if (errorIfExists)
+            {
+                var result = await ReadImplementation(key).ConfigureAwait(false);
+                if (result.OperationStatus is Status.Ok) throw new KeyAlreadyExistsException();
+            }
+
+            await WriteImplementation(key, value, expireInSeconds).ConfigureAwait(false);
+
+            return WriteResult.Ok();
         }
     }
 }

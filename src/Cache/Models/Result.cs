@@ -10,18 +10,18 @@ public abstract class Result
     public Status OperationStatus { get; set; }
 }
 
-public class ReadResult<T> : Result
+public class ReadResult : Result
 {
-    public ReadResult(Status operationStatus, ReadReason? reason, T? value) : base(operationStatus)
+    public ReadResult(Status operationStatus, ReadReason? reason, string? value) : base(operationStatus)
     {
         Reason = reason;
         Value = value;
     }
      
-    public static ReadResult<T> Ok( T value, ReadReason? reason = null) => new(Status.Ok, reason, value);
-    public static ReadResult<T> Fail(T value, ReadReason? reason = null) => new(Status.Fail, reason, value);
+    public static ReadResult Ok(string? value, ReadReason? reason = null) => new(Status.Ok, reason, value);
+    public static ReadResult Fail(string? value, ReadReason? reason = null) => new(Status.Fail, reason, value);
     
-    public T? Value { get; set; }
+    public string? Value { get; set; }
     
     public ReadReason? Reason { get; set; }
 }
