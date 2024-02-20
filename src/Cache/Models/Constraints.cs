@@ -1,3 +1,3 @@
 namespace GerwimFeiken.Cache.Models;
 
-public class ClassConstraint<T> where T : class {}
+public class ClassConstraint<T> where T : class? {}

@@ -75,7 +75,7 @@ public abstract class BaseCache : ICache
     }
 
 
-    public async Task<T?> Read<T>(string key, ClassConstraint<T>? ignored = null) where T : class
+    public async Task<T?> Read<T>(string key, ClassConstraint<T>? ignored = null) where T : class?
     {
         try
         {
@@ -127,7 +127,7 @@ public abstract class BaseCache : ICache
     }
 
     public async Task<T?> ReadOrWrite<T>(string key, Func<T?> func, int? expireInSeconds = null,
-        ClassConstraint<T>? ignored = null) where T : class
+        ClassConstraint<T>? ignored = null) where T : class?
     {
         var existingValue = await Read<T>(key).ConfigureAwait(false);
         if (existingValue is not null) return existingValue;
@@ -151,7 +151,7 @@ public abstract class BaseCache : ICache
     }
 
     public async Task<T?> ReadOrWrite<T>(string key, Func<Task<T?>> func, int? expireInSeconds = null,
-        ClassConstraint<T>? ignored = null) where T : class
+        ClassConstraint<T>? ignored = null) where T : class?
     {
         var existingValue = await Read<T>(key).ConfigureAwait(false);
         if (existingValue is not null) return existingValue;
@@ -172,7 +172,7 @@ public abstract class BaseCache : ICache
     }
 
     public async Task<T?> ReadOrWrite<T>(string key, Func<T?> func, TimeSpan expireIn,
-        ClassConstraint<T>? ignored = null) where T : class
+        ClassConstraint<T>? ignored = null) where T : class?
     {
         var seconds = expireIn.TotalSeconds;
         if (seconds > int.MaxValue) seconds = int.MaxValue;
@@ -190,7 +190,7 @@ public abstract class BaseCache : ICache
     }
 
     public async Task<T?> ReadOrWrite<T>(string key, Func<Task<T?>> func, TimeSpan expireIn,
-        ClassConstraint<T>? ignored = null) where T : class
+        ClassConstraint<T>? ignored = null) where T : class?
     {
         var seconds = expireIn.TotalSeconds;
         if (seconds > int.MaxValue) seconds = int.MaxValue;

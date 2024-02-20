@@ -76,7 +76,7 @@ public interface ICache
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
     /// <exception cref="InvalidTypeException">Will be thrown if the type does not match</exception>
-    Task<T?> Read<T>(string key, ClassConstraint<T>? ignored = null) where T : class;
+    Task<T?> Read<T>(string key, ClassConstraint<T>? ignored = null) where T : class?;
 
     /// <summary>
     ///     Reads an object from cache
@@ -131,7 +131,7 @@ public interface ICache
     /// <returns></returns>
     /// <exception cref="InvalidTypeException">Will be thrown if the type does not match</exception>
     Task<T?> ReadOrWrite<T>(string key, Func<T?> func, int? expireInSeconds = null, ClassConstraint<T>? ignored = null)
-        where T : class;
+        where T : class?;
 
     /// <summary>
     ///     Reads a value from the cache if it exists, else execute the function, write it to the cache and return
@@ -157,7 +157,7 @@ public interface ICache
     /// <returns></returns>
     /// <exception cref="InvalidTypeException">Will be thrown if the type does not match</exception>
     Task<T?> ReadOrWrite<T>(string key, Func<Task<T?>> func, int? expireInSeconds = null,
-        ClassConstraint<T>? ignored = null) where T : class;
+        ClassConstraint<T>? ignored = null) where T : class?;
 
     /// <summary>
     ///     Reads a value from the cache if it exists, else execute the function, write it to the cache and return
@@ -182,7 +182,7 @@ public interface ICache
     /// <returns></returns>
     /// <exception cref="InvalidTypeException">Will be thrown if the type does not match</exception>
     Task<T?> ReadOrWrite<T>(string key, Func<T?> func, TimeSpan expireIn, ClassConstraint<T>? ignored = null)
-        where T : class;
+        where T : class?;
 
     /// <summary>
     ///     Reads a value from the cache if it exists, else execute the function, write it to the cache and return
@@ -207,7 +207,7 @@ public interface ICache
     /// <returns></returns>
     /// <exception cref="InvalidTypeException">Will be thrown if the type does not match</exception>
     Task<T?> ReadOrWrite<T>(string key, Func<Task<T?>> func, TimeSpan expireIn, ClassConstraint<T>? ignored = null)
-        where T : class;
+        where T : class?;
 
     /// <summary>
     ///     Returns a list of all keys and optionally starting with the prefix
