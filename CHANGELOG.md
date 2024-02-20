@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 ---
+## [1.8.1] - 2024-02-20
+
+### Bug Fixes
+
+- nullability constraint - ([8492607](https://github.com/gerwim/cache/commit/8492607a7b6a34148ec03d041d42439bf2a147e1)) - Gerwim Feiken
+
+### Miscellaneous Chores
+
+- bump version - ([b341f99](https://github.com/gerwim/cache/commit/b341f99fa3507bc8417288eec9777edf4f156798)) - Gerwim Feiken
+
+---
 ## [1.8.0] - 2024-02-19
 
 ### Bug Fixes
