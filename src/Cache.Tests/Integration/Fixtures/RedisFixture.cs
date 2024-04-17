@@ -1,5 +1,6 @@
 ﻿using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
+using Testcontainers.Redis;
 
 namespace Cache.Tests.Integration.Fixtures;
 
@@ -7,7 +8,7 @@ public class RedisFixture : IDisposable
 {
     public RedisFixture()
     {
-        RedisContainer = new ContainerBuilder()
+        RedisContainer = new RedisBuilder()
             .WithImage("redis:6.2")
             .WithPortBinding("6379")
             .Build();
