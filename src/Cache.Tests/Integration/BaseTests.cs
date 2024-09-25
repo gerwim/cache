@@ -263,6 +263,24 @@ public abstract class BaseTests<T> where T : BaseCache
     }
     
     [Fact]
+    public async Task WriteAndReadKey_CustomTypeAttribute()
+    {
+        // Arrange 
+        var data = new CustomType
+        {
+             Type = "type"
+        };
+        var sut = (T)Activator.CreateInstance(typeof(T), _options)!;
+        await sut.Write(nameof(WriteAndReadKey_CustomTypeAttribute), data, 60).ConfigureAwait(false);
+        
+        // Act
+        var act = await sut.Read<CustomType>(nameof(WriteAndReadKey_CustomTypeAttribute)).ConfigureAwait(false);
+
+        // Assert
+        act.Should().Be(data);
+    }
+    
+    [Fact]
     public async Task WriteAndReadKey_DifferentNullability()
     {
         // Arrange 

@@ -8,7 +8,7 @@ public class DefaultSerializerSettings : JsonSerializerSettings
     public DefaultSerializerSettings()
     {
         TypeNameHandling = TypeNameHandling.Objects;
-        ContractResolver = new PrivateSetterAndCtorContractResolver();
+        ContractResolver = new CustomContractResolver();
         ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
     }
 }
