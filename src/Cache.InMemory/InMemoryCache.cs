@@ -13,7 +13,7 @@ namespace GerwimFeiken.Cache.InMemory
     public class InMemoryCache : BaseCache
     {
         private readonly IInMemoryOptions _options;
-        private static ConcurrentDictionary<string, (DateTime expireAtUtc, string data)> LocalCache { get; } = new();
+        private static ConcurrentDictionary<string, (DateTime expireAtUtc, byte[] data)> LocalCache { get; } = new();
         private static readonly SemaphoreSlim WriteLock = new(1, 1);
         
         public InMemoryCache(IInMemoryOptions options) : base(options)
@@ -61,7 +61,7 @@ namespace GerwimFeiken.Cache.InMemory
             return Task.FromResult(ReadResult.Fail(null, ReadReason.KeyDoesNotExist));
         }
 
-        protected override async Task<WriteResult> WriteImplementation(string key, string value, int? expireInSeconds)
+        protected override async Task<WriteResult> WriteImplementation(string key, byte[] value, int? expireInSeconds)
         {
             try
             {
@@ -80,7 +80,7 @@ namespace GerwimFeiken.Cache.InMemory
             return WriteResult.Ok();
         }
 
-        protected override async Task<WriteResult> WriteImplementation(string key, string value, bool errorIfExists, int? expireInSeconds)
+        protected override async Task<WriteResult> WriteImplementation(string key, byte[] value, bool errorIfExists, int? expireInSeconds)
         {
             if (!errorIfExists)
             {
@@ -107,7 +107,7 @@ namespace GerwimFeiken.Cache.InMemory
             return WriteResult.Ok();
         }
         
-        private (DateTime expireAtUtc, string? data) ConvertValue(string value, int? expireInSeconds)
+        private (DateTime expireAtUtc, byte[] data) ConvertValue(byte[] value, int? expireInSeconds)
         {
             return (DateTime.UtcNow.AddSeconds(expireInSeconds ?? _options.DefaultExpirationTtl),
                     value

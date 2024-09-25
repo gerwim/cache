@@ -61,7 +61,7 @@ namespace GerwimFeiken.Cache.Cloudflare
                 throw new DeleteException($"Could not list keys from Cloudflare: {await response.Content.ReadAsStringAsync().ConfigureAwait(false)}");
             }
             
-            var obj = DeserializeObject<CloudflareListKeysResponse>(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
+            var obj = DeserializeObject<CloudflareListKeysResponse>(System.Text.Encoding.UTF8.GetBytes(await response.Content.ReadAsStringAsync().ConfigureAwait(false)));
             return obj?.Result?.Select(x => x.Name) ?? Array.Empty<string>();
         }
 
@@ -76,17 +76,17 @@ namespace GerwimFeiken.Cache.Cloudflare
 
             if (response.Content is null || response.StatusCode is HttpStatusCode.NotFound) return ReadResult.Fail(null, ReadReason.KeyDoesNotExist);
 
-            return ReadResult.Ok(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
+            return ReadResult.Ok(System.Text.Encoding.UTF8.GetBytes(await response.Content.ReadAsStringAsync().ConfigureAwait(false)));
         }
 
-        protected override async Task<WriteResult> WriteImplementation(string key, string value, int? expireInSeconds)
+        protected override async Task<WriteResult> WriteImplementation(string key, byte[] value, int? expireInSeconds)
         {
             if ((expireInSeconds ?? _expirationTtl) < 60)
             {
                 throw new WriteException("Expiration should be 60 or greater.");
             }
             
-            var response = await _cloudflareApi.WriteKey(key, expireInSeconds ?? _expirationTtl, value).ConfigureAwait(false);
+            var response = await _cloudflareApi.WriteKey(key, expireInSeconds ?? _expirationTtl, System.Text.Encoding.UTF8.GetString(value)).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
                 throw new WriteException($"Could not write to Cloudflare: {await response.Content.ReadAsStringAsync().ConfigureAwait(false)}");
@@ -95,7 +95,7 @@ namespace GerwimFeiken.Cache.Cloudflare
             return WriteResult.Ok();
         }
         
-        protected override async Task<WriteResult> WriteImplementation(string key, string value, bool errorIfExists, int? expireInSeconds)
+        protected override async Task<WriteResult> WriteImplementation(string key, byte[] value, bool errorIfExists, int? expireInSeconds)
         {
             if (errorIfExists)
             {

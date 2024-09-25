@@ -4,27 +4,28 @@ using System.Threading.Tasks;
 using GerwimFeiken.Cache.Exceptions;
 using GerwimFeiken.Cache.Models;
 using GerwimFeiken.Cache.Options;
-using GerwimFeiken.Cache.SerializerSettings;
-using Newtonsoft.Json;
+using MessagePack;
+using MessagePack.Resolvers;
 
 namespace GerwimFeiken.Cache;
 
 public abstract class BaseCache : ICache
 {
-    private readonly JsonSerializerSettings _jsonSerializerSettings;
+    private readonly MessagePackSerializerOptions _options;
 
     protected BaseCache(IOptions options)
     {
-        _jsonSerializerSettings = options.JsonSerializerSettings ??
-                                  new DefaultSerializerSettings();
+        _options = options.SerializerOptions ??
+                   MessagePackSerializerOptions.Standard
+                       .WithResolver(TypelessContractlessStandardResolver.Instance);
     }
 
     public Task Write<T>(string key, T value, int? expireInSeconds = null)
     {
-        var json = SerializeObject(value);
-        if (json is null) return Task.CompletedTask;
+        var bytes = SerializeObject(value);
+        if (bytes is null) return Task.CompletedTask;
 
-        return WriteImplementation(key, json, expireInSeconds);
+        return WriteImplementation(key, bytes, expireInSeconds);
     }
 
     public Task Write<T>(string key, T value, TimeSpan expireIn)
@@ -65,12 +66,9 @@ public abstract class BaseCache : ICache
 
             return DeserializeObject<T>(json);
         }
-        catch (Exception ex)
+        catch (InvalidCastException)
         {
-            if (ex.Message.Contains("Could not convert"))
-                throw new InvalidTypeException($"The value of key being queried is not of type {typeof(T)}");
-
-            throw;
+            throw new InvalidTypeException($"The value of key being queried is not of type {typeof(T)}");
         }
     }
 
@@ -79,17 +77,14 @@ public abstract class BaseCache : ICache
     {
         try
         {
-            var json = (await ReadImplementation(key).ConfigureAwait(false)).Value;
-            if (json is null) return null;
+            var value = (await ReadImplementation(key).ConfigureAwait(false)).Value;
+            if (value is null) return null;
 
-            return DeserializeObject<T>(json);
+            return DeserializeObject<T>(value);
         }
-        catch (Exception ex)
+        catch (InvalidCastException)
         {
-            if (ex.Message.Contains("Could not convert"))
-                throw new InvalidTypeException($"The value of key being queried is not of type {typeof(T)}");
-
-            throw;
+            throw new InvalidTypeException($"The value of key being queried is not of type {typeof(T)}");
         }
     }
 
@@ -202,30 +197,30 @@ public abstract class BaseCache : ICache
     protected abstract Task DeleteImplementation(IEnumerable<string> keys);
     protected abstract Task<IEnumerable<string>> ListKeysImplementation(string? prefix);
     protected abstract Task<ReadResult> ReadImplementation(string key);
-    protected abstract Task<WriteResult> WriteImplementation(string key, string value, int? expireInSeconds);
+    protected abstract Task<WriteResult> WriteImplementation(string key, byte[] value, int? expireInSeconds);
 
-    protected abstract Task<WriteResult> WriteImplementation(string key, string value, bool errorIfExists,
+    protected abstract Task<WriteResult> WriteImplementation(string key, byte[] value, bool errorIfExists,
         int? expireInSeconds);
 
     /// <summary>
-    ///     Serializes the object using Newtonsoft.Json
+    ///     Serializes the object
     /// </summary>
     /// <param name="value"></param>
     /// <returns></returns>
-    protected virtual string? SerializeObject(object? value)
+    protected virtual byte[]? SerializeObject(object? value)
     {
         if (value is null) return null;
-
-        return JsonConvert.SerializeObject(value, _jsonSerializerSettings);
+        
+        return MessagePackSerializer.Typeless.Serialize(value);
     }
 
     /// <summary>
-    ///     Deserializes the object using Newtonsoft.Json
+    ///     Deserializes the object
     /// </summary>
     /// <param name="value"></param>
     /// <returns></returns>
-    protected virtual T? DeserializeObject<T>(string value)
+    protected virtual T? DeserializeObject<T>(byte[] value)
     {
-        return JsonConvert.DeserializeObject<T>(value, _jsonSerializerSettings);
+        return (T?)MessagePackSerializer.Typeless.Deserialize(value, _options);
     }
 }

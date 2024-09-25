@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+using MessagePack;
 
 namespace GerwimFeiken.Cache.Options;
 
@@ -12,5 +12,5 @@ public interface IOptions
     /// <summary>
     /// (De)serialization settings. If set, this will overwrite the default settings.
     /// </summary>
-    JsonSerializerSettings? JsonSerializerSettings { get; set; }
+    MessagePackSerializerOptions? SerializerOptions { get; set; }
 }

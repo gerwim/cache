@@ -70,7 +70,7 @@ namespace GerwimFeiken.Cache.Redis
 
                 if (!response.HasValue) return ReadResult.Fail(null, ReadReason.KeyDoesNotExist);
                 
-                return ReadResult.Ok(response.ToString());
+                return ReadResult.Ok(response);
             }
             catch (RedisConnectionException ex)
             {
@@ -86,17 +86,17 @@ namespace GerwimFeiken.Cache.Redis
             }
         }
 
-        protected override async Task<WriteResult> WriteImplementation(string key, string value, int? expireInSeconds)
+        protected override async Task<WriteResult> WriteImplementation(string key, byte[] value, int? expireInSeconds)
         {
             return await RedisWrite(key, value, expireInSeconds, When.Always).ConfigureAwait(false);
         }
 
-        protected override async Task<WriteResult> WriteImplementation(string key, string value, bool errorIfExists, int? expireInSeconds)
+        protected override async Task<WriteResult> WriteImplementation(string key, byte[] value, bool errorIfExists, int? expireInSeconds)
         {
             return await RedisWrite(key, value, expireInSeconds, errorIfExists ? When.NotExists : When.Always).ConfigureAwait(false);
         }
         
-        private async Task<WriteResult> RedisWrite(string key, string value, int? expireInSeconds, When when) {
+        private async Task<WriteResult> RedisWrite(string key, byte[] value, int? expireInSeconds, When when) {
             try
             {
                 var redisDb = _redis.GetDatabase();

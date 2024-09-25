@@ -12,16 +12,16 @@ public abstract class Result
 
 public class ReadResult : Result
 {
-    public ReadResult(Status operationStatus, ReadReason? reason, string? value) : base(operationStatus)
+    public ReadResult(Status operationStatus, ReadReason? reason, byte[]? value) : base(operationStatus)
     {
         Reason = reason;
         Value = value;
     }
      
-    public static ReadResult Ok(string? value, ReadReason? reason = null) => new(Status.Ok, reason, value);
-    public static ReadResult Fail(string? value, ReadReason? reason = null) => new(Status.Fail, reason, value);
+    public static ReadResult Ok(byte[]? value, ReadReason? reason = null) => new(Status.Ok, reason, value);
+    public static ReadResult Fail(byte[]? value, ReadReason? reason = null) => new(Status.Fail, reason, value);
     
-    public string? Value { get; set; }
+    public byte[]? Value { get; set; }
     
     public ReadReason? Reason { get; set; }
 }
