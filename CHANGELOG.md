@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 ---
+## [1.9.0] - 2024-11-15
+
+### Features
+
+- add cache stampede protection - ([d778bad](https://github.com/gerwim/cache/commit/d778badfd9a16bcf246de4a26f3fb3b6a965453e)) - Gerwim Feiken
+
+### Miscellaneous Chores
+
+- bump version - ([de31723](https://github.com/gerwim/cache/commit/de31723ac9dafe370ae19684aab8c72b71bd0b8b)) - Gerwim Feiken
+
+### Tests
+
+- use Testcontainers.Redis instead of the generic TestContainers package - ([3df4f51](https://github.com/gerwim/cache/commit/3df4f5167bfa6a17ee988faa7f3641b7c66378ba)) - Gerwim Feiken
+
+---
 ## [1.8.1] - 2024-02-20
 
 ### Bug Fixes
