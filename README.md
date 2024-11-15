@@ -6,6 +6,10 @@
 * Cloudflare KV storage (`CloudflareCache`)
 * Redis (`RedisCache`)
 
+# Features
+1. Support for multiple providers (and you can write your own).
+2. Cache stampede protection (if you use the `ReadOrWrite` method).
+
 # How to use
 ## Dependency injection
 

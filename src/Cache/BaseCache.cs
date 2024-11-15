@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using GerwimFeiken.Cache.Exceptions;
 using GerwimFeiken.Cache.Models;
@@ -11,6 +13,7 @@ namespace GerwimFeiken.Cache;
 
 public abstract class BaseCache : ICache
 {
+    private static readonly ConcurrentDictionary<string, SemaphoreSlim> Locks = new();
     private readonly JsonSerializerSettings _jsonSerializerSettings;
 
     protected BaseCache(IOptions options)
@@ -117,49 +120,81 @@ public abstract class BaseCache : ICache
     public async Task<T?> ReadOrWrite<T>(string key, Func<T?> func, int? expireInSeconds = null, T? ignored = null)
         where T : struct
     {
-        var existingValue = await Read<T>(key).ConfigureAwait(false);
-        if (existingValue is not null) return existingValue;
+        var @lock = await AcquireLock(key).ConfigureAwait(false);
+        try
+        {
+            var existingValue = await Read<T>(key).ConfigureAwait(false);
+            if (existingValue is not null) return existingValue;
 
-        var result = func();
+            var result = func();
 
-        if (result is not null) await Write(key, result, expireInSeconds).ConfigureAwait(false);
-        return result;
+            if (result is not null) await Write(key, result, expireInSeconds).ConfigureAwait(false);
+            return result;
+        }
+        finally
+        {
+            @lock.Release();
+        }
     }
 
     public async Task<T?> ReadOrWrite<T>(string key, Func<T?> func, int? expireInSeconds = null,
         ClassConstraint<T>? ignored = null) where T : class?
     {
-        var existingValue = await Read<T>(key).ConfigureAwait(false);
-        if (existingValue is not null) return existingValue;
+        var @lock = await AcquireLock(key).ConfigureAwait(false);
+        try
+        {
+            var existingValue = await Read<T>(key).ConfigureAwait(false);
+            if (existingValue is not null) return existingValue;
 
-        var result = func();
+            var result = func();
 
-        if (result is not null) await Write(key, result, expireInSeconds).ConfigureAwait(false);
-        return result;
+            if (result is not null) await Write(key, result, expireInSeconds).ConfigureAwait(false);
+            return result;
+        }
+        finally
+        {
+            @lock.Release();
+        }
     }
 
     public async Task<T?> ReadOrWrite<T>(string key, Func<Task<T?>> func, int? expireInSeconds = null,
         T? ignored = null) where T : struct
     {
-        var existingValue = await Read<T>(key).ConfigureAwait(false);
-        if (existingValue is not null) return existingValue;
+        var @lock = await AcquireLock(key).ConfigureAwait(false);
+        try
+        {
+            var existingValue = await Read<T>(key).ConfigureAwait(false);
+            if (existingValue is not null) return existingValue;
 
-        var result = await func().ConfigureAwait(false);
+            var result = await func().ConfigureAwait(false);
 
-        if (result is not null) await Write(key, result, expireInSeconds).ConfigureAwait(false);
-        return result;
+            if (result is not null) await Write(key, result, expireInSeconds).ConfigureAwait(false);
+            return result;
+        }
+        finally
+        {
+            @lock.Release();
+        }
     }
 
     public async Task<T?> ReadOrWrite<T>(string key, Func<Task<T?>> func, int? expireInSeconds = null,
         ClassConstraint<T>? ignored = null) where T : class?
     {
-        var existingValue = await Read<T>(key).ConfigureAwait(false);
-        if (existingValue is not null) return existingValue;
+        var @lock = await AcquireLock(key).ConfigureAwait(false);
+        try
+        {
+            var existingValue = await Read<T>(key).ConfigureAwait(false);
+            if (existingValue is not null) return existingValue;
 
-        var result = await func().ConfigureAwait(false);
+            var result = await func().ConfigureAwait(false);
 
-        if (result is not null) await Write(key, result, expireInSeconds).ConfigureAwait(false);
-        return result;
+            if (result is not null) await Write(key, result, expireInSeconds).ConfigureAwait(false);
+            return result;
+        }
+        finally
+        {
+            @lock.Release();
+        }
     }
 
     public async Task<T?> ReadOrWrite<T>(string key, Func<T?> func, TimeSpan expireIn, T? ignored = null)
@@ -227,5 +262,13 @@ public abstract class BaseCache : ICache
     protected virtual T? DeserializeObject<T>(string value)
     {
         return JsonConvert.DeserializeObject<T>(value, _jsonSerializerSettings);
+    }
+    
+    private static async Task<SemaphoreSlim> AcquireLock(string key)
+    {
+        var semaphore = Locks.GetOrAdd(key, new SemaphoreSlim(1, 1));
+        await semaphore.WaitAsync().ConfigureAwait(false);
+
+        return semaphore;
     }
 }
